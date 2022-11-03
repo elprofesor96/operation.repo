@@ -14,6 +14,10 @@ This tool makes files and folders for redteam experts like: nmap, buster, burp, 
 
 You can then create a backup file where you can send to your project manager review or to your client, etc
 
+## Repo Files
+- .auditignore
+
+ignore files from backup and remove
 ## Example
 ```bash
 audit init
