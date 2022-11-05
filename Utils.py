@@ -5,7 +5,7 @@ from datetime import datetime
 
 class Utils:
     def __init__(self):
-        return None
+        self.counter = 1
 
   
             
@@ -20,19 +20,23 @@ class Utils:
 
     def create_folders(self, enabled_folder_list):
         pwd = os.getcwd()
+        counter = 1
         for folder in enabled_folder_list:
             try:
                 os.mkdir(pwd+"/"+folder)
-                print("[+] Created ", pwd+"/"+folder)
+                print("[+] [{}/{}] Created {}".format(counter,len(enabled_folder_list),pwd+"/"+folder))
+                counter += 1
             except:
                 pass
     
     def create_files(self, enabled_file_list):
         pwd = os.getcwd()
+        counter = 1
         for file in enabled_file_list:
             try:
                 Path(pwd+"/"+file).touch()
-                print("[+] Created ", pwd+"/"+file)
+                print("[+] [{}/{}] Created {}".format(counter,len(enabled_file_list),pwd+"/"+file))
+                counter += 1
             except:
                 pass
 
