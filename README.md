@@ -1,10 +1,5 @@
 # Audit Repository (Git like)
 
-## Dependancy
-- zip sould be installed.
-```bash
-apt install zip
-```
 
 ## Description
 RedTeam tool to stay organized. It is used for keeping better notes.
@@ -18,6 +13,9 @@ You can then create a backup file where you can send to your project manager rev
 - .auditignore
 
 ignore files from backup and remove
+- custom structure tree in .conf file
+
+
 ## Example
 ```bash
 audit init

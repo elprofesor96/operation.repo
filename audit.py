@@ -6,6 +6,7 @@ from pathlib import Path
 import zipfile
 import ConfigHandler
 import Utils
+import shutil
 
 def config_init():
     return None
@@ -37,6 +38,7 @@ def init():
     return True
 
 def backup():
+    ### backing up into .zip file except for files in .auditignore
     pwd = os.getcwd()
     zip__output_name = Utils.Utils().generate_zipout_name()
     auditignore_lines = Utils.Utils().read_auditignore()
@@ -50,23 +52,22 @@ def backup():
     parsed_restricted_files = []
     for parsed in restricted_files:
         if os.path.isdir(parsed):
-            #print("true", parsed)
             for p in Path(parsed).rglob("*"):
-            # print(p)
                 restricted_files.append(str(p))
         else:
             pass
     for fil in all_files:
         if str(fil) in restricted_files:
-            ## restrict from .auditignore
             pass
         else:
             zip_list.append(str(fil))
     print()
+    counter = 1
     for zip in zip_list:
         if zip != pwd+"/"+zip__output_name:
-            print("[+] Zipping {}".format(zip))
+            print("[+] [{}/{}] Zipping {}".format(counter, len(zip_list)-1, zip))
             backup_zip.write(zip)
+            counter += 1
     backup_zip.close()
     print("\n[*] Output saved at ", pwd+"/"+zip__output_name)
     Utils.Utils().write_to_auditignore(zip__output_name)
@@ -76,9 +77,40 @@ def backup():
 def remove():
     ### delete all files from repo except the ones from .auditignore
     pwd = os.getcwd()
-    auditignore_lines = read_auditignore()
-    processed_lines = process_auditignore(auditignore_lines)
-    print(processed_lines)
+    auditignore_lines = Utils.Utils().read_auditignore()
+    parsed_lines = Utils.Utils().process_auditignore(auditignore_lines)
+    all_files = []
+    for p in Path(pwd).rglob("*"):
+        all_files.append(p)
+    restricted_files = parsed_lines
+    remove_list = []
+    parsed_restricted_files = []
+    for parsed in restricted_files:
+        if os.path.isdir(parsed):
+            for p in Path(parsed).rglob("*"):
+                restricted_files.append(str(p))
+        else:
+            pass
+    for fil in all_files:
+        if str(fil) in restricted_files:
+            pass
+        else:
+            remove_list.append(str(fil))
+    print()
+    counter = 1
+    for removed in remove_list:
+        try:
+            if os.path.isfile(removed):
+                print("[-] [{}/{}] Removed {}".format(counter, len(remove_list), removed))
+                os.remove(removed)
+            else:
+                print("[-] [{}/{}] Removed {}".format(counter, len(remove_list), removed))
+                shutil.rmtree(removed)
+            counter += 1
+        except FileNotFoundError:
+            counter += 1
+            pass
+    print("\n[*] Removed audit repo successfuly!")
     return True
 
 def main():
@@ -87,7 +119,7 @@ def main():
         init()
         exit()
     elif args.init[0] == 'remove':
-      #  remove()
+        remove()
         exit()
     elif args.init[0] == 'backup':
         backup()
