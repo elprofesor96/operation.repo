@@ -2,6 +2,12 @@
 
 import argparse
 import os
+from pathlib import Path
+import zipfile
+import configparser
+
+def config_init():
+    return None
 
 def args_init():
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter,prog="audit",description="""Init audit repo to stay organised. 
@@ -17,48 +23,66 @@ Credits:
 
 def init():
     pwd = os.getcwd()
-    os.system('mkdir {}/nmap'.format(pwd))
-    os.system('mkdir {}/buster'.format(pwd))
-    os.system('mkdir {}/osint'.format(pwd))
-    os.system('mkdir {}/c2'.format(pwd))
-    os.system('mkdir {}/proxies'.format(pwd))
-    os.system('mkdir {}/phish'.format(pwd))
-    os.system('mkdir {}/burp'.format(pwd))
-    os.system('mkdir {}/openvpn'.format(pwd))
-    os.system('mkdir {}/www'.format(pwd))
-    os.system('touch {}/www/index.html'.format(pwd))
-    os.system('mkdir {}/smb'.format(pwd))
-    os.system('touch {}/ips.txt'.format(pwd))
-    os.system('mkdir {}/obsidian'.format(pwd))
-    os.system('touch {}/.auditignore'.format(pwd))
-    os.system('mkdir {}/webapps'.format(pwd))
+    
+    ## create folderds
+    os.mkdir(pwd+"/nmap")
+    os.mkdir(pwd+"/buster")
+    os.mkdir(pwd+"/osint")
+    os.mkdir(pwd+"/c2")
+    os.mkdir(pwd+"/proxies")
+    os.mkdir(pwd+"/phish")
+    os.mkdir(pwd+"/burp")
+    os.mkdir(pwd+"/openvpn")
+    os.mkdir(pwd+"/www")
+    os.mkdir(pwd+"/smb")
+    os.mkdir(pwd+"/obsidian")
+    os.mkdir(pwd+"/webapps")
+    os.mkdir(pwd+"/exploits")
+
+    ## create files
+    Path(pwd+"/.auditignore").touch()
+    Path(pwd+"/ips.txt").touch()
+    Path(pwd+"/www/index.html").touch()
 
     print("\n[*] Audit repo is initialized!")
     return True
 
 def backup():
-    ### creates a .zip file from all files from repo except files from .auditignore
     pwd = os.getcwd()
     zip__output_name = pwd.split(sep="/")[-1] + "-backup.zip"
-    #print(zip__output_name)
-    ## exclude file with full path
-    ## exclude_file = pwd+"/audit.py"
-    exclude_file_cmd = "-x " + pwd + "/audit.py "
-    exclude_file_cmd += "-x " + pwd + "/.auditignore "
     auditignore_lines = read_auditignore()
-    for i in auditignore_lines:
-        if '.' in i:
-            exclude_file_cmd += " -x " + pwd + "/" +  i.split(sep="\n")[0]
+    parsed_lines = process_auditignore(auditignore_lines)
+    backup_zip = zipfile.ZipFile(zip__output_name, 'w')
+    all_files = []
+    for p in Path(pwd).rglob("*"):
+        all_files.append(p)
+    restricted_files = parsed_lines
+    zip_list = []
+    parsed_restricted_files = []
+    for parsed in restricted_files:
+        if os.path.isdir(parsed):
+            #print("true", parsed)
+            for p in Path(parsed).rglob("*"):
+               # print(p)
+                restricted_files.append(str(p))
         else:
-            if os.path.isdir(i.split(sep="\n")[0]):
-                exclude_file_cmd += " -x " + pwd + "/" +  i.split(sep="\n")[0] + "/"
-            else:
-                exclude_file_cmd += " -x " + pwd + "/" +  i.split(sep="\n")[0]
-    #print(exclude_file_cmd)
-    cmd = "zip -r {} {} {}".format(zip__output_name, pwd, exclude_file_cmd)
-    os.system(cmd)
-    os.system('echo {} >> .auditignore'.format(zip__output_name))
-    return True
+            pass
+    for fil in all_files:
+        if str(fil) in restricted_files:
+            ## restrict from .auditignore
+            pass
+        else:
+            zip_list.append(str(fil))
+    print()
+    for zip in zip_list:
+        print("[+] Zipping {}".format(zip))
+        backup_zip.write(zip)
+    backup_zip.close()
+    print("[*] Output saved at ", pwd+"/"+zip__output_name)
+    with open(pwd+"/.auditignore", "a") as auditignore:
+        auditignore.write(zip__output_name)
+    auditignore.close()
+
 
 def read_auditignore():
     pwd = os.getcwd()
@@ -72,15 +96,19 @@ def read_auditignore():
         exit()
         return False
 
+def process_auditignore(lines):
+    results = []
+    pwd = os.getcwd()
+    for i in lines:
+        results.append(pwd+"/"+i.split(sep="\n")[0])
+    return results
+
 def remove():
     ### delete all files from repo except the ones from .auditignore
     pwd = os.getcwd()
     auditignore_lines = read_auditignore()
-    find_cmd_args = ''
-    for i in auditignore_lines:
-        find_cmd_args += ' -not -name ' + i.split(sep="\n")[0]
-    os.system('find {} {} -not -name audit.py -not -name {} -delete'.format(pwd, find_cmd_args, pwd.split(sep="/")[-1]))
-    print("\n[*] Audit repo deleted!")
+    processed_lines = process_auditignore(auditignore_lines)
+    print(processed_lines)
     return True
 
 def main():
