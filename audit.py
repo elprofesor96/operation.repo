@@ -4,14 +4,16 @@ import argparse
 import os
 from pathlib import Path
 import zipfile
-import configparser
+import ConfigHandler
+import Utils
 
 def config_init():
     return None
 
 def args_init():
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter,prog="audit",description="""Init audit repo to stay organised. 
-    
+Change audit.conf file to have a more custom audit repo generator.
+
 Credits:
     https://elprofesor.io
     https://github.com/elprofesor96""", epilog="Example: audit init")
@@ -23,35 +25,22 @@ Credits:
 
 def init():
     pwd = os.getcwd()
-    
-    ## create folderds
-    os.mkdir(pwd+"/nmap")
-    os.mkdir(pwd+"/buster")
-    os.mkdir(pwd+"/osint")
-    os.mkdir(pwd+"/c2")
-    os.mkdir(pwd+"/proxies")
-    os.mkdir(pwd+"/phish")
-    os.mkdir(pwd+"/burp")
-    os.mkdir(pwd+"/openvpn")
-    os.mkdir(pwd+"/www")
-    os.mkdir(pwd+"/smb")
-    os.mkdir(pwd+"/obsidian")
-    os.mkdir(pwd+"/webapps")
-    os.mkdir(pwd+"/exploits")
-
-    ## create files
-    Path(pwd+"/.auditignore").touch()
-    Path(pwd+"/ips.txt").touch()
-    Path(pwd+"/www/index.html").touch()
-
-    print("\n[*] Audit repo is initialized!")
+    confighandler = ConfigHandler.ConfigHandler()
+    print()
+    ## create .auditignore file which is always on by default
+    Utils.Utils().create_auditignore()
+    enabled_folders = confighandler.readFolderStructure()
+    Utils.Utils().create_folders(enabled_folders)
+    enabled_files = confighandler.readFileStructure()
+    Utils.Utils().create_files(enabled_files)
+    print("\n[*] Audit repo is initialized successfuly!")
     return True
 
 def backup():
     pwd = os.getcwd()
-    zip__output_name = pwd.split(sep="/")[-1] + "-backup.zip"
-    auditignore_lines = read_auditignore()
-    parsed_lines = process_auditignore(auditignore_lines)
+    zip__output_name = Utils.Utils().generate_zipout_name()
+    auditignore_lines = Utils.Utils().read_auditignore()
+    parsed_lines = Utils.Utils().process_auditignore(auditignore_lines)
     backup_zip = zipfile.ZipFile(zip__output_name, 'w')
     all_files = []
     for p in Path(pwd).rglob("*"):
@@ -63,7 +52,7 @@ def backup():
         if os.path.isdir(parsed):
             #print("true", parsed)
             for p in Path(parsed).rglob("*"):
-               # print(p)
+            # print(p)
                 restricted_files.append(str(p))
         else:
             pass
@@ -75,33 +64,14 @@ def backup():
             zip_list.append(str(fil))
     print()
     for zip in zip_list:
-        print("[+] Zipping {}".format(zip))
-        backup_zip.write(zip)
+        if zip != pwd+"/"+zip__output_name:
+            print("[+] Zipping {}".format(zip))
+            backup_zip.write(zip)
     backup_zip.close()
-    print("[*] Output saved at ", pwd+"/"+zip__output_name)
-    with open(pwd+"/.auditignore", "a") as auditignore:
-        auditignore.write(zip__output_name)
-    auditignore.close()
+    print("\n[*] Output saved at ", pwd+"/"+zip__output_name)
+    Utils.Utils().write_to_auditignore(zip__output_name)
 
 
-def read_auditignore():
-    pwd = os.getcwd()
-    try:
-        f = open('{}/.auditignore'.format(pwd), 'r')
-        data = f.readlines()
-        f.close()
-        return data
-    except:
-        print("\n[-] Audit repo is not initialized!")
-        exit()
-        return False
-
-def process_auditignore(lines):
-    results = []
-    pwd = os.getcwd()
-    for i in lines:
-        results.append(pwd+"/"+i.split(sep="\n")[0])
-    return results
 
 def remove():
     ### delete all files from repo except the ones from .auditignore
@@ -117,7 +87,7 @@ def main():
         init()
         exit()
     elif args.init[0] == 'remove':
-        remove()
+      #  remove()
         exit()
     elif args.init[0] == 'backup':
         backup()
@@ -126,7 +96,5 @@ def main():
         parser.print_help()
 
     
-    
-
 if __name__ == '__main__':
     main()
