@@ -17,7 +17,7 @@ Change audit.conf file to have a more custom audit repo generator.
 
 Credits:
     https://elprofesor.io
-    https://github.com/elprofesor96""", epilog="Example: audit init")
+    https://github.com/elprofesor96/audit.repo""", epilog="Example: audit init")
     parser.add_argument("init", help="initialized audit repo",nargs='*', action="store")
     parser.add_argument("backup", help="backing up audit repo into .zip, except for .auditignore files",nargs='*', action="store")
     parser.add_argument("remove", help="remove audit repo files except .zip backup and .auditignore files.",nargs='*', action="store")
@@ -62,12 +62,13 @@ def backup():
         else:
             zip_list.append(str(fil))
     print()
-    counter = 1
+    counter = 0
     for zip in zip_list:
         if zip != pwd+"/"+zip__output_name:
-            print("[+] [{}/{}] Zipping {}".format(counter, len(zip_list)-1, zip))
-            backup_zip.write(zip)
-            counter += 1
+            if zip != pwd+"/"+".auditignore":
+                backup_zip.write(zip)
+                counter += 1
+                print("[+] [{}/{}] Zipping {}".format(counter, len(zip_list)-2, zip))
     backup_zip.close()
     print("\n[*] Output saved at ", pwd+"/"+zip__output_name)
     Utils.Utils().write_to_auditignore(zip__output_name)
