@@ -24,7 +24,7 @@ class Utils:
         for folder in enabled_folder_list:
             try:
                 os.mkdir(pwd+"/"+folder)
-                print("[+] [{}/{}] Created {}".format(counter,len(enabled_folder_list),pwd+"/"+folder))
+                print("[+] [{}/{}] Created folder {}".format(counter,len(enabled_folder_list),pwd+"/"+folder))
                 counter += 1
             except:
                 pass
@@ -35,7 +35,7 @@ class Utils:
         for file in enabled_file_list:
             try:
                 Path(pwd+"/"+file).touch()
-                print("[+] [{}/{}] Created {}".format(counter,len(enabled_file_list),pwd+"/"+file))
+                print("[+] [{}/{}] Created file {}".format(counter,len(enabled_file_list),pwd+"/"+file))
                 counter += 1
             except:
                 pass
