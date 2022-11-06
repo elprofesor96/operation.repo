@@ -8,8 +8,6 @@ import ConfigHandler
 import Utils
 import shutil
 
-def config_init():
-    return None
 
 def args_init():
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter,prog="audit",description="""Init audit repo to stay organised. 
