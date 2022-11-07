@@ -1,29 +1,48 @@
 # Audit Repository (Git like)
 
-
-## Description
+# Description
 RedTeam tool to stay organized. It is used for keeping better notes.
+
 This project was inspired from Git command line.
 
-This tool makes files and folders for redteam experts like: nmap, buster, burp, etc.
+Easy to start new engagements and keep track of your logs even if it's professional/corporate project or machines on hackthebox.
 
-You can then create a backup file where you can send to your project manager review or to your client, etc
+# Summary
 
-## Repo Files
-- .auditignore
+- ## audit init
+Creates ".auditignore" which is default file.
 
-ignore files from backup and remove
-- custom structure tree in .conf file
+Creates files and folders from "audit.conf" such as nmap, obsidian, burp, etc.
 
+Highly customizable in "audit.conf", can make your own audit repo init.
 
-## Example
+After installation, "audit.conf" file is found in "/etc/audit/audit.conf"
+
+- ## audit backup
+Creates a backup file (.zip) from all audit repo files/folders except ones from .auditignore
+
+- ## audit remove
+Remove/Delete all files/folders from audit repo except ones from .auditignore
+
+# Install
+- ## Automatic Install
+from apt repo server
+- ## Manual Install
+
+## Usage
+```bash
+audit -h
+```
 ```bash
 audit init
 ```
 ```bash
 audit backup
 ```
-## Usage
+```bash
+audit remove
+```
+## Example
 
 
 

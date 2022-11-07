@@ -6,8 +6,6 @@ from datetime import datetime
 class Utils:
     def __init__(self):
         self.counter = 1
-
-  
             
     def create_auditignore(self):
         pwd = os.getcwd()
