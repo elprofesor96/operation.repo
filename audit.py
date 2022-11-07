@@ -11,7 +11,8 @@ import shutil
 
 def args_init():
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter,prog="audit",description="""Init audit repo to stay organised. 
-Change audit.conf file to have a more custom audit repo generator.
+Change audit.conf file to have a more custom audit repo init.
+audit.conf is found in /etc/audit/audit.conf
 
 Credits:
     https://elprofesor.io
