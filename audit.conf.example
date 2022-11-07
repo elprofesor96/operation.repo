@@ -1,0 +1,8 @@
+[FOLDER STRUCTURE]
+
+yourcustomfolder = True
+mycustom = True
+
+[FILE STRUCTURE]
+
+mycustom/secret.txt = False

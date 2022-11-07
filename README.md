@@ -26,10 +26,17 @@ Remove/Delete all files/folders from audit repo except ones from .auditignore
 
 # Install
 - ## Automatic Install
-from apt repo server
+From apt repo server. SOON
 - ## Manual Install
+From https://github.com/elProfesor96/audit.repo/releases , download latest .deb release.
+```bash
+sudo apt update
+```
+```bash
+sudo apt install ./audit-latest-release.deb
+```
 
-## Usage
+# Usage
 ```bash
 audit -h
 ```
@@ -43,6 +50,5 @@ audit backup
 audit remove
 ```
 ## Example
-
-
+SOON
 
