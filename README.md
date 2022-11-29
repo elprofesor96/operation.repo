@@ -49,6 +49,8 @@ audit backup
 ```bash
 audit remove
 ```
-## Example
+# Example
 SOON
 
+# Audit Server
+SOON
