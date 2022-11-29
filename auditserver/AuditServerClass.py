@@ -44,11 +44,21 @@ class AuditServerClass:
             self.createSSHKey(audit_user)
             self.createAuditFile(audit_user)
 
+    def checkIfUserIsAuditUser(self, audit_user):
+        audit_file = "/home/" + audit_user + "/.audit"
+        if os.path.exists(audit_file):
+            return True
+        else:
+            return False
+
     def deleteUser(self, audit_user):
         if os.geteuid() != 0:
             exit("\n[-] You need to have root privileges to create new auditserver users.\n[-] Please try again using sudo.")
-        os.system("userdel -r {}".format(audit_user))
-        print("\n[+] User {} deleted successfully".format(audit_user))
+        if self.checkIfUserIsAuditUser(audit_user):
+            os.system("userdel -r {}".format(audit_user))
+            print("\n[+] User {} deleted successfully".format(audit_user))
+        else:
+            print("\n[-] User {} is not an audit user.".format(audit_user))
         
     def createSSHKey(self, audit_user):
         print("[+] Create .ssh folder for user: {}".format(audit_user))
