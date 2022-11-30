@@ -23,3 +23,6 @@ class ConfigHandler:
             if enabled == "True":
                 self.enabled_files.append(file)
         return self.enabled_files
+
+    def readServerConfig(self):
+        pass

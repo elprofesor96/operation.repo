@@ -5,7 +5,7 @@ import os
 from pathlib import Path
 import zipfile
 import ConfigHandler
-import Utils
+import AuditClass
 import shutil
 
 
@@ -28,20 +28,20 @@ def init():
     confighandler = ConfigHandler.ConfigHandler()
     print()
     ## create .auditignore file which is always on by default
-    Utils.Utils().create_auditignore()
+    AuditClass.AuditClass().create_auditignore()
     enabled_folders = confighandler.readFolderStructure()
-    Utils.Utils().create_folders(enabled_folders)
+    AuditClass.AuditClass().create_folders(enabled_folders)
     enabled_files = confighandler.readFileStructure()
-    Utils.Utils().create_files(enabled_files)
+    AuditClass.AuditClass().create_files(enabled_files)
     print("\n[*] Audit repo is initialized successfuly!")
     return True
 
 def backup():
     ### backing up into .zip file except for files in .auditignore
     pwd = os.getcwd()
-    zip__output_name = Utils.Utils().generate_zipout_name()
-    auditignore_lines = Utils.Utils().read_auditignore()
-    parsed_lines = Utils.Utils().process_auditignore(auditignore_lines)
+    zip__output_name = AuditClass.AuditClass().generate_zipout_name()
+    auditignore_lines = AuditClass.AuditClass().read_auditignore()
+    parsed_lines = AuditClass.AuditClass().process_auditignore(auditignore_lines)
     backup_zip = zipfile.ZipFile(zip__output_name, 'w')
     all_files = []
     for p in Path(pwd).rglob("*"):
@@ -70,15 +70,15 @@ def backup():
                 print("[+] [{}/{}] Zipping {}".format(counter, len(zip_list)-2, zip))
     backup_zip.close()
     print("\n[*] Output saved at ", pwd+"/"+zip__output_name)
-    Utils.Utils().write_to_auditignore(zip__output_name)
+    AuditClass.AuditClass().write_to_auditignore(zip__output_name)
 
 
 
 def remove():
     ### delete all files from repo except the ones from .auditignore
     pwd = os.getcwd()
-    auditignore_lines = Utils.Utils().read_auditignore()
-    parsed_lines = Utils.Utils().process_auditignore(auditignore_lines)
+    auditignore_lines = AuditClass.AuditClass().read_auditignore()
+    parsed_lines = AuditClass.AuditClass().process_auditignore(auditignore_lines)
     all_files = []
     for p in Path(pwd).rglob("*"):
         all_files.append(p)

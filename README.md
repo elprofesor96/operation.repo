@@ -54,3 +54,9 @@ SOON
 
 # Audit Server
 SOON
+
+# TODO
+- view markdown readme.md from terminal
+- implement: audit.py list (list all repos from auditserver)
+- implement: audit.conf [SERVER] with ssh, possible to omit user from audit.conf.
+Parse username from ssh key filename
