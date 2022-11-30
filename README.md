@@ -60,3 +60,5 @@ SOON
 - implement: audit.py list (list all repos from auditserver)
 - implement: audit.conf [SERVER] with ssh, possible to omit user from audit.conf.
 Parse username from ssh key filename
+
+- SERVER SECURITY (restrictive shell, do not let user to login, only available commands: ls -al)
