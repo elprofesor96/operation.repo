@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import AuditServerClass
+import opsserver.OpsServerClass as OpsServerClass
 import argparse
 
 def args_init():
@@ -21,18 +21,18 @@ def main():
     args, parser = args_init()
     try:
         if args.status[0] == 'status':
-            AuditServerClass.AuditServerClass().checkSSHPort()
+            OpsServerClass.AuditServerClass().checkSSHPort()
             exit()
         elif args.status[0] == 'createuser' and args.status[1]:
             user_arg = args.status[1]
-            AuditServerClass.AuditServerClass().createUser(user_arg)
+            OpsServerClass.AuditServerClass().createUser(user_arg)
             exit()
         elif args.status[0] == 'deleteuser' and args.status[1]:
             user_arg = args.status[1]
-            AuditServerClass.AuditServerClass().deleteUser(user_arg)
+            OpsServerClass.AuditServerClass().deleteUser(user_arg)
             exit()
         elif args.status[0] == 'users':
-            AuditServerClass.AuditServerClass().users()
+            OpsServerClass.AuditServerClass().users()
             exit()
         else:
             parser.print_help()

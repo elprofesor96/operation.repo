@@ -1,7 +1,7 @@
 import socket
 import os
 
-class AuditServerClass:
+class OpsServerClass:
     def __init__(self):
         self.ssh_port = 22
         self.audit_user = ''

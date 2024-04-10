@@ -4,9 +4,9 @@ import socket
 import time
 import os
 import tqdm
-import AuditClass
+import OpClass
 
-class AuditClassToServer:
+class OpClassToServer:
     def __init__(self):
         pass
     

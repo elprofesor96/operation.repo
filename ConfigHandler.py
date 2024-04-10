@@ -6,10 +6,10 @@ class ConfigHandler:
         self.enabled_files = []
         self.enabled_deployable = []
         self.config = configparser.ConfigParser()
-        self.config.read("/Users/elprofesor/dev/github/audit.repo/audit.conf")
-        self.ssh_key_folder_path = "/Users/elprofesor/dev/github/audit.repo/ssh/"
+        self.config.read("/Users/elprofesor/dev/github/operation.repo/op.conf")
+        self.ssh_key_folder_path = "/Users/elprofesor/dev/github/operation.repo/ssh/"
         ### db for deployable scripts (where they are stored)
-        self.deployable_folder_path = "/Users/elprofesor/dev/github/audit.repo/deployable/"
+        self.deployable_folder_path = "/Users/elprofesor/dev/github/operation.repo/deployable/"
         ### remove script path is on auditserver or where auditserver is located
         self.remove_script_path = "/home/audit/utils.sh"
         self.sections = self.config.sections()
