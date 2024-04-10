@@ -4,3 +4,4 @@ company
 ssh/audit_auditserver
 ssh/localhost_auditserver
 reports
+operation.repo.venv
