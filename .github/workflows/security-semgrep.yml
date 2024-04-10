@@ -28,10 +28,10 @@ jobs:
           defectdojo-username: ${{ secrets.DEFECTDOJO_USERNAME }}
           defectdojo-password: ${{ secrets.DEFECTDOJO_PASSWORD }}
           defectdojo-product-type: github.com
-          defectdojo-product: operation.repo
+          defectdojo-product: ${{ secrets.DEFECTDOJO_PRODUCT }}
           defectdojo-environment-type: Production
           defectdojo-scan-type: Semgrep JSON Report
-          defectdojo-engagement-name: operation.repo.ci.cd
+          defectdojo-engagement-name: ${{ secrets.DEFECTDOJO_ENGAGEMENT_NAME}}
           scan-results-file-name: semgrep-report.json
     
           
