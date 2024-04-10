@@ -6,9 +6,21 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 - Refactor code to be more readable and changed from `AUDIT` to `OP` from operation.
+- added CI scans snyk
+- added CI scans semgrep
+- added CI scans bandit
 
 ### Changed
 - Changed name from audit.repo into operation.repo
+- opsserver
+- op init
+- op init -c [custom]
+- op remove
+- op backup
+- op list
+- op push
+- op clone
+- refactor logic to use .operation and .opignore as defaults for using operation.repo app
 
 
 ## [v1.3.2] - 2022-11-7
