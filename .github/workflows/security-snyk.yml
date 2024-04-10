@@ -41,6 +41,23 @@ jobs:
           defectdojo-engagement-name: operation.repo.ci.cd
           scan-results-file-name: snyk-report.json
 
+      - name: Run Snyk Code scan
+        run: snyk code test --all-projects --json-file-output=snyk-code-report.json || true
+
+      - name: import scan results into defectdojo
+        uses: portswigger-cloud/defectdojo-import-scan@v1.0.1
+        with:
+          ####  need backtrail / for URL otherwise pipeline will fail
+          #### example: https://defectdojo.example.com/
+          defectdojo-url: ${{ secrets.DEFECTDOJO_URL }}
+          defectdojo-username: ${{ secrets.DEFECTDOJO_USERNAME }}
+          defectdojo-password: ${{ secrets.DEFECTDOJO_PASSWORD }}
+          defectdojo-product-type: github.com
+          defectdojo-product: operation.repo
+          defectdojo-environment-type: Production
+          defectdojo-scan-type: Snyk Scan
+          defectdojo-engagement-name: operation.repo.ci.cd
+          scan-results-file-name: snyk-code-report.json
 
       
 
