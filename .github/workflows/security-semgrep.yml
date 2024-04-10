@@ -31,7 +31,7 @@ jobs:
           defectdojo-product: operation.repo
           defectdojo-environment-type: Production
           defectdojo-scan-type: Semgrep JSON Report
-          defectdojo-engagement-name: operation.repo
+          defectdojo-engagement-name: operation.repo.ci.cd
           scan-results-file-name: semgrep-report.json
     
           

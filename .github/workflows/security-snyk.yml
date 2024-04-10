@@ -24,7 +24,7 @@ jobs:
         run: snyk auth ${{ secrets.SNYK_API_TOKEN }}
       # Display Snyk test results
       - name: Run Snyk Security scan
-        run: snyk test --json-file-output=snyk-report.json
+        run: snyk test --all-projects --json-file-output=snyk-report.json
 
       - name: import scan results into defectdojo
         uses: portswigger-cloud/defectdojo-import-scan@v1.0.1
@@ -38,7 +38,7 @@ jobs:
           defectdojo-product: operation.repo
           defectdojo-environment-type: Production
           defectdojo-scan-type: Snyk Scan
-          defectdojo-engagement-name: operation.repo
+          defectdojo-engagement-name: operation.repo.ci.cd
           scan-results-file-name: snyk-report.json
 
 
