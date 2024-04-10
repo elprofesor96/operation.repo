@@ -25,15 +25,30 @@ Creates a backup file (.zip) from all audit repo files/folders except ones from 
 Remove/Delete all files/folders from audit repo except ones from .auditignore
 
 # Install
-- ## Automatic Install
+- ## Automatic Install from apt server (RELEASED)
 From apt repo server. SOON
-- ## Manual Install
+- ## Automatic Install from github release page (RELEASED)
 From https://github.com/elProfesor96/audit.repo/releases , download latest .deb release.
 ```bash
 sudo apt update
 ```
 ```bash
 sudo apt install ./audit-latest-release.deb
+```
+- ## Manual install from git clone (ONLY for DEV)
+Git clone repo.
+```bash
+git clone https://github.com/elProfesor96/audit.repo.git
+```
+Change those lines in ConfigHandler.py to your current paths from your cloned repo. 
+
+Change to the FULL PATH.
+```python
+self.config.read("/Users/elprofesor/dev/github/audit.repo/audit.conf")
+self.ssh_key_folder_path = "/Users/elprofesor/dev/github/audit.repo/ssh/"
+### remove script path is on auditserver or where auditserver is located
+### in this case, auditserver is tested on localhost (127.0.0.1)
+self.remove_script_path = "/Users/elprofesor/dev/github/audit.repo/auditserver/remove.sh"
 ```
 
 # Usage
@@ -56,9 +71,5 @@ SOON
 SOON
 
 # TODO
-- view markdown readme.md from terminal
-- implement: audit.py list (list all repos from auditserver)
-- implement: audit.conf [SERVER] with ssh, possible to omit user from audit.conf.
-Parse username from ssh key filename
 
 - SERVER SECURITY (restrictive shell, do not let user to login, only available commands: ls -al)

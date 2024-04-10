@@ -42,10 +42,10 @@ class AuditServerClass:
             print("[+] Created user: {}".format(audit_user))
             os.system("useradd -m {}".format(audit_user))
             self.createSSHKey(audit_user)
-            self.createAuditFile(audit_user)
+            self.createAuditUserFile(audit_user)
 
     def checkIfUserIsAuditUser(self, audit_user):
-        audit_file = "/home/" + audit_user + "/.audit"
+        audit_file = "/home/" + audit_user + "/.audituser"
         if os.path.exists(audit_file):
             return True
         else:
@@ -65,8 +65,8 @@ class AuditServerClass:
         ssh_folder = "/home/" + audit_user + "/.ssh"
         os.mkdir(ssh_folder)
         print("[+] Create SSH key pair for user: ", audit_user)
-        os.system("ssh-keygen -f {} -N ''".format(ssh_folder + "/" + audit_user))
-        public_key_path = ssh_folder + "/" + audit_user + ".pub"
+        os.system("ssh-keygen -f {} -N ''".format(ssh_folder + "/" + audit_user + "_auditserver"))
+        public_key_path = ssh_folder + "/" + audit_user + "_auditserver" + ".pub"
         public_key = ''
         with open(public_key_path, 'r') as file:
             public_key = file.read()
@@ -77,11 +77,11 @@ class AuditServerClass:
         os.system("chmod 600 {}".format(ssh_folder + "/authorized_keys"))
         os.system("chown -R {}:{} {}".format(audit_user, audit_user, ssh_folder))
 
-    def createAuditFile(self, audit_user):
-        with open("/home/" + audit_user + "/.audit", 'w') as file:
+    def createAuditUserFile(self, audit_user):
+        with open("/home/" + audit_user + "/.audituser", 'w') as file:
             file.write("audit user")
         file.close()
-        os.system("chown -R {}:{} {}".format(audit_user, audit_user, "/home/" + audit_user + "/.audit"))
+        os.system("chown -R {}:{} {}".format(audit_user, audit_user, "/home/" + audit_user + "/.audituser"))
 
     def users(self):
         if os.geteuid() != 0:
@@ -90,7 +90,7 @@ class AuditServerClass:
         audit_users = []
         for user in all_users:
             user_files = os.listdir("/home/" + user)
-            if ".audit" in user_files:
+            if ".audituser" in user_files:
                 audit_users.append(user)
         length_audit_users = len(audit_users)
         counter = 1

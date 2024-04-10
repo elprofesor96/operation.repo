@@ -1,3 +1,16 @@
+; config for connecting to audit server
+
+[SERVER]
+
+auditserver_ip = 127.0.0.1
+ssh_key = audit_auditserver
+
+; audit init
+; GLOBAL CONFIG (you only need this if you have the same type of engagements over and over again like redteaming)
+; For example, you have only redteam engagements, you will develop your OWN GLOBAL config to use it on every redteam project.
+; (the methodology and notes will be the same over and over again if you do only one type of projects)
+
+
 [FOLDER STRUCTURE]
 
 yourcustomfolder = True
@@ -6,3 +19,8 @@ mycustom = True
 [FILE STRUCTURE]
 
 mycustom/secret.txt = False
+ips.txt = True
+
+[DEPLOYABLE FOLDER/FILE]
+
+linpeas.sh = True

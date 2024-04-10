@@ -10,8 +10,8 @@ Credits:
     https://elprofesor.io
     https://github.com/elprofesor96/audit.repo""", epilog="Example: auditserver status")
     parser.add_argument("status", help="check status of auditserver", nargs='*', action="store")
-    parser.add_argument("createuser", help="create auditserver user", nargs='*', action="store")
-    parser.add_argument("deleteuser", help="delete auditserver user", nargs='*', action="store")
+    parser.add_argument("createuser", help="create auditserver user. Example: auditserver createuser user", nargs='*', action="store")
+    parser.add_argument("deleteuser", help="delete auditserver user. Example: auditserver deleteuser user", nargs='*', action="store")
     parser.add_argument("users", help="list of auditserver users", nargs="*", action="store")
     args = parser.parse_args()
     return args, parser
