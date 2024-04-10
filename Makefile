@@ -20,6 +20,7 @@ security: | $(REPORTS_FOLDER)
 	trufflehog git file://. | tee $(REPORTS_FOLDER)/trufflehog-git.report  || true
 	gitleaks detect . | tee $(REPORTS_FOLDER)/gitleaks.report || true
 	snyk test --all-projects | tee $(REPORTS_FOLDER)/snyk.report   || true
+	snyk code test --all-projects | tee $(REPORTS_FOLDER)/snyk-code.report   || true
 	bandit -r . --exclude ./.venv | tee $(REPORTS_FOLDER)/bandit.report || true
 	semgrep scan | tee $(REPORTS_FOLDER)/semgrep.report || true
 
