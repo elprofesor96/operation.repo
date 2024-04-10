@@ -5,7 +5,7 @@ import zipfile
 import shutil
 import random
 
-class AuditClass:
+class OpClass:
     def __init__(self):
         self.counter = 1
         self.total_default = 5
