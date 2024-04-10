@@ -4,8 +4,6 @@ All notable changes to this project will be documented in this file.
 
 ## [v2.0.0] - 2024-4-14
 
-
-### Changes
 - Refactor code to be more readable and changed from `AUDIT` to `OP` from operation.
 - added CI scans snyk to defectdojo
 - added CI scans semgrep to defectdojo
@@ -25,7 +23,6 @@ All notable changes to this project will be documented in this file.
 
 ## [v1.3.2] - 2022-11-7
 
-### Changes
 - auditserver
 - audit init
 - audit init -c [custom]
@@ -40,6 +37,5 @@ All notable changes to this project will be documented in this file.
 
 ## [v1.3.1] - 2022-11-3
 
-### Changes
 - Core functionality of the application.
 - audit init skeleton with remove and backup.
