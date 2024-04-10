@@ -21,6 +21,7 @@ All notable changes to this project will be documented in this file.
 - op push
 - op clone
 - refactor logic to use .operation and .opignore as defaults for using operation.repo app
+- changed README.md to reflect operation.repo instead of audit.repo docs
 
 
 ## [v1.3.2] - 2022-11-7

@@ -1,4 +1,4 @@
-# Audit Repository (Git like)
+# Operation Repository (Git like)
 
 # Description
 RedTeam tool to stay organized. It is used for keeping better notes.
@@ -9,26 +9,26 @@ Easy to start new engagements and keep track of your logs even if it's professio
 
 # Summary
 
-- ## audit init
-Creates ".auditignore" which is default file.
+- ## op init
+Creates ".opignore" which is default file.
 
-Creates files and folders from "audit.conf" such as nmap, obsidian, burp, etc.
+Creates files and folders from "op.conf" such as nmap, obsidian, burp, etc.
 
-Highly customizable in "audit.conf", can make your own audit repo init.
+Highly customizable in "op.conf", can make your own audit repo init.
 
-After installation, "audit.conf" file is found in "/etc/audit/audit.conf"
+After installation, "op.conf" file is found in "/etc/op/op.conf"
 
-- ## audit backup
-Creates a backup file (.zip) from all audit repo files/folders except ones from .auditignore
+- ## op backup
+Creates a backup file (.zip) from all audit repo files/folders except ones from .opignore
 
-- ## audit remove
-Remove/Delete all files/folders from audit repo except ones from .auditignore
+- ## op remove
+Remove/Delete all files/folders from audit repo except ones from .opignore
 
 # Install
 - ## Automatic Install from apt server (RELEASED)
 From apt repo server. SOON
 - ## Automatic Install from github release page (RELEASED)
-From https://github.com/elProfesor96/audit.repo/releases , download latest .deb release.
+From https://github.com/elProfesor96/operation.repo/releases , download latest .deb release.
 ```bash
 sudo apt update
 ```
@@ -44,32 +44,29 @@ Change those lines in ConfigHandler.py to your current paths from your cloned re
 
 Change to the FULL PATH.
 ```python
-self.config.read("/Users/elprofesor/dev/github/audit.repo/audit.conf")
-self.ssh_key_folder_path = "/Users/elprofesor/dev/github/audit.repo/ssh/"
+self.config.read("/Users/elprofesor/dev/github/operation.repo/op.conf")
+self.ssh_key_folder_path = "/Users/elprofesor/dev/github/operation.repo/ssh/"
 ### remove script path is on auditserver or where auditserver is located
 ### in this case, auditserver is tested on localhost (127.0.0.1)
-self.remove_script_path = "/Users/elprofesor/dev/github/audit.repo/auditserver/remove.sh"
+self.remove_script_path = "/Users/elprofesor/dev/github/operation.repo/auditserver/remove.sh"
 ```
 
 # Usage
 ```bash
-audit -h
+op -h
 ```
 ```bash
-audit init
+op init
 ```
 ```bash
-audit backup
+op backup
 ```
 ```bash
-audit remove
+op remove
 ```
 # Example
 SOON
 
 # Audit Server
-SOON
+working
 
-# TODO
-
-- SERVER SECURITY (restrictive shell, do not let user to login, only available commands: ls -al)
