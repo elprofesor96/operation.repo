@@ -21,6 +21,7 @@ security: | $(REPORTS_FOLDER)
 	gitleaks detect . | tee $(REPORTS_FOLDER)/gitleaks.report || true
 	snyk test | tee $(REPORTS_FOLDER)/snyk.report   || true
 	bandit -r . --exclude ./.venv | tee $(REPORTS_FOLDER)/bandit.report || true
+	semgrep scan | tee $(REPORTS_FOLDER)/semgrep.report || true
 
 
 # Ensure the reports folder exists
