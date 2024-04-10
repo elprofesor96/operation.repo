@@ -6,9 +6,9 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 - Refactor code to be more readable and changed from `AUDIT` to `OP` from operation.
-- added CI scans snyk
-- added CI scans semgrep
-- added CI scans bandit
+- added CI scans snyk to defectdojo
+- added CI scans semgrep to defectdojo
+- added CI scans bandit to defectdojo
 
 ### Changed
 - Changed name from audit.repo into operation.repo
