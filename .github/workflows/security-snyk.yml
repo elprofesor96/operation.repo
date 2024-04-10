@@ -1,0 +1,47 @@
+name: security-snyk
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches: 
+      - main
+
+jobs:
+  security-snyk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Install pip3 requirements
+        run: pip3 install -r requirements.txt
+      # Install Snyk CLI
+      - name: Install Snyk CLI
+        run: npm install -g snyk
+      # Authenticate with Snyk using your API token
+      - name: Authenticate with Snyk
+        run: snyk auth ${{ secrets.SNYK_API_TOKEN }}
+      # Display Snyk test results
+      - name: Run Snyk Security scan
+        run: snyk test --json-file-output=snyk-report.json
+
+      - name: import scan results into defectdojo
+        uses: portswigger-cloud/defectdojo-import-scan@v1.0.1
+        with:
+          ####  need backtrail / for URL otherwise pipeline will fail
+          #### example: https://defectdojo.example.com/
+          defectdojo-url: ${{ secrets.DEFECTDOJO_URL }}
+          defectdojo-username: ${{ secrets.DEFECTDOJO_USERNAME }}
+          defectdojo-password: ${{ secrets.DEFECTDOJO_PASSWORD }}
+          defectdojo-product-type: github.com
+          defectdojo-product: operation.repo
+          defectdojo-environment-type: Production
+          defectdojo-scan-type: Snyk Scan
+          defectdojo-engagement-name: operation.repo
+          scan-results-file-name: snyk-report.json
+
+
+      
+
+      
