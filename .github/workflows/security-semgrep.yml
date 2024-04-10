@@ -35,10 +35,3 @@ jobs:
           scan-results-file-name: semgrep-report.json
     
           
-
-      
-
-
-
-
-semgrep scan --json --output=semgrep.json
