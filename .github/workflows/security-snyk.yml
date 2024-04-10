@@ -38,7 +38,7 @@ jobs:
           defectdojo-product: operation.repo
           defectdojo-environment-type: Production
           defectdojo-scan-type: Snyk Scan
-          defectdojo-engagement-name: operation.repo
+          defectdojo-engagement-name: operation.repo.ci.cd
           scan-results-file-name: snyk-report.json
 
 
