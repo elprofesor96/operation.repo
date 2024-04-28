@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [v2.0.0] - 2024-4-28
 
-- Refactor code to be more readable and changed from `AUDIT` to `OP` from operation.
+- 
 - added CI scans snyk to defectdojo
 - added CI scans semgrep to defectdojo
 - added CI scans bandit to defectdojo
@@ -12,7 +12,7 @@ All notable changes to this project will be documented in this file.
 - added codeql
 - added ruleset and protect branches
 - Changed name from audit.repo into operation.repo
-- opsserver
+- opsserver 2.0.0 (linux only .deb)
 - op init
 - op init -c [custom]
 - op remove
@@ -20,8 +20,7 @@ All notable changes to this project will be documented in this file.
 - op list
 - op push
 - op clone
-- refactor logic to use .operation and .opignore as defaults for using operation.repo app
-- changed README.md to reflect operation.repo instead of audit.repo docs
+- REFACTOR and rethink code, redesign for `OP` instead of `AUDIT`
 
 
 ## [v1.3.2] - 2022-11-7
