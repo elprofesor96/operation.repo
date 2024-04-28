@@ -5,3 +5,5 @@ ssh/audit_auditserver
 ssh/localhost_auditserver
 reports
 .venv
+operation.repo.rb
+setup.py
