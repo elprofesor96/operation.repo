@@ -65,15 +65,18 @@ def view(repo):
     OpClass.OpClass.view(readme)
 
 def default_op_config_init_first_run():
-    home_folder = os.path.expanduser("~")
+    home_folder = ConfigHandler.ConfigHandler().getHomeFolder()
     default_op_conf = [
         "[SERVER]",
         "opsserver_ip = [127.0.0.1]",
         "ssh_key = [example_key_path]",
+        "[FOLDER]",
+        "[FILE]",
+        "[DB]",
     ]
     try:
         os.mkdir(home_folder + "/.op")
-        os.mkdir(home_folder + "/.op/db")
+        os.mkdir(home_folder + "/.op/opsdb")
         with open(home_folder + "/.op/op.conf", 'w') as file:
             for line in default_op_conf:
                 file.write(line + "\n")

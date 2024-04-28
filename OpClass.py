@@ -37,16 +37,16 @@ class OpClass:
             Path(pwd+"/README.md").touch()
             print("[+] [3/{}] Created default ".format(self.total_default), pwd+"/README.md")
 
-    def create_deployable(self):
+    def create_opsdb(self):
         pwd = os.getcwd()
-        if os.path.isdir(pwd+"/deployable"):
+        if os.path.isdir(pwd+"/opsdb"):
             print("[-] op repo is already initialized!")
             exit()
         else:
-            os.mkdir(pwd+"/deployable")
-            print("[+] [4/{}] Created default ".format(self.total_default), pwd+"/deployable")
-            Path(pwd+"/deployable/index.html").touch()
-            print("[+] [5/{}] Created default ".format(self.total_default), pwd+"/deployable/index.html")
+            os.mkdir(pwd+"/opsdb")
+            print("[+] [4/{}] Created default ".format(self.total_default), pwd+"/opsdb")
+            Path(pwd+"/opsdb/index.html").touch()
+            print("[+] [5/{}] Created default ".format(self.total_default), pwd+"/opsdb/index.html")
 
     def create_default(self):
         self.create_opfolder()
@@ -54,7 +54,7 @@ class OpClass:
         pwd = os.getcwd()
         self.write_to_opignore(".op")
         self.create_readme()
-        self.create_deployable()
+        self.create_opsdb()
 
     def create_to_deployable(self, enabled_deploy_list, deployable_db):
         pwd = os.getcwd()
@@ -231,8 +231,8 @@ class OpClass:
         self.create_folders(enabled_folders)
         enabled_files = confighandler.readFileStructure()
         self.create_files(enabled_files)
-        enabled_deploys = confighandler.readDeployableStructure()
-        deployable_db = confighandler.getDeployableFolderPath()
+        enabled_deploys = confighandler.readDbStructure()
+        deployable_db = confighandler.getDbFolderPath()
         self.create_to_deployable(enabled_deploys, deployable_db)
         print("\n[*] op repo is initialized successfuly!")
         return True

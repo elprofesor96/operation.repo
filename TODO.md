@@ -3,6 +3,7 @@
 ## PATCH
 
 - remove op.conf from /etc or something like that. maybe need only each user to do it itself in it's home.
+- NEED TO REWORK the op.conf to have default already implemented and in op.conf just the customable ones
 
 ## Dev
 

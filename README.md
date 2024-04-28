@@ -42,13 +42,9 @@ git clone https://github.com/elProfesor96/audit.repo.git
 ```
 Change those lines in ConfigHandler.py to your current paths from your cloned repo. 
 
-Change to the FULL PATH.
+Change to the FULL PATH and git repo while developing.
 ```python
-self.config.read("/Users/elprofesor/dev/github/operation.repo/op.conf")
-self.ssh_key_folder_path = "/Users/elprofesor/dev/github/operation.repo/ssh/"
-### remove script path is on auditserver or where auditserver is located
-### in this case, auditserver is tested on localhost (127.0.0.1)
-self.remove_script_path = "/Users/elprofesor/dev/github/operation.repo/auditserver/remove.sh"
+self.home_folder = os.path.expanduser("~") (change to git repo folder)
 ```
 
 # Usage
@@ -67,6 +63,6 @@ op remove
 # Example
 SOON
 
-# Audit Server
+# Ops Server
 working
 

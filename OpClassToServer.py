@@ -61,7 +61,7 @@ class OpClassToServer:
         ssh_key_path = ConfigHandler.ConfigHandler().getSSHKeyFolderPath() + ssh_key
         self.checkIfUserCanConnect(ssh_key_path, ip, user)
         if len(ip) < 2:
-            print("\n[-] Check /etc/operation.repo/op.conf for server configuration.")
+            print("\n[-] Check ~/.op/op.conf for server configuration.")
             exit()
         zip_name = OpClass.OpClass().backup()
         pwd = os.getcwd()
