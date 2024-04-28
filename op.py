@@ -3,6 +3,7 @@ import argparse
 import ConfigHandler
 import OpClass
 import OpClassToServer
+import os
 
 def args_init():
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter,prog="op",description="""Init operation repo to stay organised. 
@@ -63,7 +64,27 @@ def view(repo):
     readme = OpClassToServer.OpClassToServer().cat_readme_from_opsserver(key, user, ip, repo)
     OpClass.OpClass.view(readme)
 
+def default_op_config_init_first_run():
+    home_folder = os.path.expanduser("~")
+    default_op_conf = [
+        "[SERVER]",
+        "opserver_ip = [127.0.0.1]",
+        "ssh_key = [example_key_path]",
+    ]
+    try:
+        os.mkdir(home_folder + "/.op")
+        os.mkdir(home_folder + "/.op/db")
+        with open(home_folder + "/.op/op.conf", 'w') as file:
+            for line in default_op_conf:
+                file.write(line + "\n")
+        file.close()
+    except:
+        pass
+
+
+
 def main():
+    default_op_config_init_first_run()
     args, parser = args_init()
     try:
         if args.init[0] == 'init':

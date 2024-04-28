@@ -1,10 +1,14 @@
 # Operation Repo TODO
 
+## PATCH
+
+- remove op.conf from /etc or something like that. maybe need only each user to do it itself in it's home.
+
 ## Dev
 
 - need to find a way to build pip package and host to github
 - need to find a way to autmate CD to build .deb 
-- need to learn how to create brew formulae for macos users
+- need to learn how to create brew formulae for macos users (*)
 
 
 ## DevOps

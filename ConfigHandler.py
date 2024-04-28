@@ -1,4 +1,5 @@
 import configparser
+import os
 
 class ConfigHandler:
     def __init__(self):
@@ -6,12 +7,14 @@ class ConfigHandler:
         self.enabled_files = []
         self.enabled_deployable = []
         self.config = configparser.ConfigParser()
-        self.config.read("/Users/elprofesor/dev/github/operation.repo/op.conf")
-        self.ssh_key_folder_path = "/Users/elprofesor/dev/github/operation.repo/ssh/"
+        self.home_folder = os.path.expanduser("~")
+        #self.home_folder = ""
+        self.config.read(self.home_folder + "/.op/op.conf")
+        #self.ssh_key_folder_path = "/Users/elprofesor/dev/github/operation.repo/ssh/"
         ### db for deployable scripts (where they are stored)
-        self.deployable_folder_path = "/Users/elprofesor/dev/github/operation.repo/deployable/"
+        self.deployable_folder_path = self.home_folder + "/.op/db/"
         ### remove script path is on auditserver or where auditserver is located
-        self.remove_script_path = "/home/audit/utils.sh"
+        #self.remove_script_path = "/home/audit/utils.sh"
         self.sections = self.config.sections()
         self.custom_template_sections = []
         self.custom_template_sections_length = 3
@@ -22,8 +25,8 @@ class ConfigHandler:
     def getRemoveScriptPath(self):
         return self.remove_script_path
 
-    def getSSHKeyFolderPath(self):
-        return self.ssh_key_folder_path
+    #def getSSHKeyFolderPath(self):
+    #    return self.ssh_key_folder_path
          
     def readFolderStructure(self):
         for folder in self.config[self.sections[1]]:
