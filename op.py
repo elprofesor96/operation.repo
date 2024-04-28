@@ -8,7 +8,7 @@ import os
 def args_init():
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter,prog="op",description="""Init operation repo to stay organised. 
 Change op.conf file to have a more custom op repo init.
-op.conf is found in /etc/op/op.conf
+op.conf is found in ~/.op/op.conf
 
 Credits:
     https://elprofesor.io
@@ -68,7 +68,7 @@ def default_op_config_init_first_run():
     home_folder = os.path.expanduser("~")
     default_op_conf = [
         "[SERVER]",
-        "opserver_ip = [127.0.0.1]",
+        "opsserver_ip = [127.0.0.1]",
         "ssh_key = [example_key_path]",
     ]
     try:

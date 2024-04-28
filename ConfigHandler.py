@@ -53,7 +53,7 @@ class ConfigHandler:
         return self.enabled_deployable
 
     def readServerConfig(self):
-        audit_server_ip = self.config[self.sections[0]]['auditserver_ip']
+        audit_server_ip = self.config[self.sections[0]]['opsserver_ip']
         ssh_key = self.config[self.sections[0]]['ssh_key']
         return audit_server_ip, ssh_key
         
@@ -67,7 +67,7 @@ class ConfigHandler:
         else:
             print()
             print("[-] Custom template init is not configured properly")
-            print("[-] Please update /etc/audit/audit.conf")
+            print("[-] Please update ~/.op/op.conf")
             exit()
 
     def readCustomFolderStructure(self):

@@ -11,13 +11,17 @@ class OpClassToServer:
         pass
     
     def checkIfServerIsStarted(self, ip):
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        response = sock.connect_ex((ip, 22))
-        if response != 0:
+        try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            response = sock.connect_ex((ip, 22))
+            if response != 0:
+                print("\n[-] Cannot connect to ops server.\n[-] Please check ops server and enable ssh port 22")
+                exit()
+            else:
+                return True
+        except:
             print("\n[-] Cannot connect to ops server.\n[-] Please check ops server and enable ssh port 22")
             exit()
-        else:
-            return True
 
     def checkIfUserCanConnect(self, ssh_key, ip, user):
         response = subprocess.run(["ssh", "-q", "-i", "{}".format(ssh_key), "{}@{}".format(user,ip), "-o", "StrictHostKeyChecking no", "-o" , "BatchMode=yes" , "whoami"], capture_output=True)
@@ -38,10 +42,10 @@ class OpClassToServer:
 
     def list_repos_from_server(self, ip, ssh_key, user):
         self.checkIfServerIsStarted(ip)
-        ssh_key_path = ConfigHandler.ConfigHandler().getSSHKeyFolderPath() + ssh_key
+        ssh_key_path = ssh_key
         self.checkIfUserCanConnect(ssh_key_path, ip, user)
         if len(ip) < 2:
-            print("\n[-] Check /etc/operation.repo/op.conf for server configuration.")
+            print("\n[-] Check ~/.op/op.conf for server configuration.")
             exit()
         print("\n[*] List all repos from ops server:\n")
         #os.system("ssh -q -i {} {}@{} -o 'StrictHostKeyChecking no' ls -1".format(ssh_key_path, user, ip))

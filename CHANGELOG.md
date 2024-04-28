@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [v2.0.0] - 2024-4-28
 
-- 
+- each user has .op folder with op.conf and db in home
 - added CI scans snyk to defectdojo
 - added CI scans semgrep to defectdojo
 - added CI scans bandit to defectdojo
