@@ -3,6 +3,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [v2.0.0] - 2024-4-28
+- fix vulnerabilities snyk
+- fix vulnerabilities dependabot
 - modify ConfigHandler.py to read sections by name instead of index for more control
 - each user has .op folder with op.conf and db in home
 - added CI scans snyk to defectdojo
