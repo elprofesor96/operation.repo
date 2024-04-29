@@ -3,5 +3,8 @@ audit-v1.3.2.deb
 company
 ssh/audit_auditserver
 ssh/localhost_auditserver
+ssh
 reports
 .venv
+operation.repo.rb
+www
