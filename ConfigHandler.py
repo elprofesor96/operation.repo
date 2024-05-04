@@ -14,7 +14,7 @@ class ConfigHandler:
         ### db for deployable scripts (where they are stored)
         self.opsdb_folder_path = self.home_folder + "/.op/opsdb/"
         ### remove script path is on auditserver or where auditserver is located
-        #self.remove_script_path = "/home/audit/utils.sh"
+        self.remove_script_path = "/home/audit/utils.sh"
         self.sections = self.config.sections()
         self.custom_template_sections = []
         self.custom_template_sections_length = 3

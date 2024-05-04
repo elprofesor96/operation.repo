@@ -42,25 +42,25 @@ def remove():
 def list_repos():
     confighandler = ConfigHandler.ConfigHandler()
     ip, key = confighandler.readServerConfig()
-    user = key.split(sep="_")[0]
+    user = key.split(sep="_")[0].split(sep="/")[-1]
     OpClassToServer.OpClassToServer().list_repos_from_server(ip, key, user)
 
 def push():
     confighandler = ConfigHandler.ConfigHandler()
     ip, key = confighandler.readServerConfig()
-    user = key.split(sep="_")[0]
+    user = key.split(sep="_")[0].split(sep="/")[-1]
     OpClassToServer.OpClassToServer().push_repo(ip, key, user)
 
 def clone(repo):
     confighandler = ConfigHandler.ConfigHandler()
     ip, key = confighandler.readServerConfig()
-    user = key.split(sep="_")[0]
+    user = key.split(sep="_")[0].split(sep="/")[-1]
     OpClassToServer.OpClassToServer().clone_repo(ip, key, user, repo)
 
 def view(repo):
     confighandler = ConfigHandler.ConfigHandler()
     ip, key = confighandler.readServerConfig()
-    user = key.split(sep="_")[0]
+    user = key.split(sep="_")[0].split(sep="/")[-1]
     readme = OpClassToServer.OpClassToServer().cat_readme_from_opsserver(key, user, ip, repo)
     OpClass.OpClass.view(readme)
 
