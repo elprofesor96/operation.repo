@@ -1,5 +1,7 @@
 # Operation Repo TODO
 
+- should implement logging !!!
+
 ## PATCH
 
 - remove op.conf from /etc or something like that. maybe need only each user to do it itself in it's home.

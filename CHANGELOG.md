@@ -8,7 +8,6 @@ All notable changes to this project will be documented in this file.
 - changes confighandler to read server config from op.conf
 
 
-
 ## [v2.0.0] - 2024-04-30
 - pip3 install from github.com
 - added on elprofesor96/repos homebrew tap to brew install it.
