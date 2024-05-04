@@ -72,8 +72,6 @@ class OpClassToServer:
         os.system("scp -q -i {} -o 'StrictHostKeyChecking no' {} {}@{}:~/{}/.op/".format(server_key, zip_name, user, ip, dir_name))
         #remove_script_path = ConfigHandler.ConfigHandler().getRemoveScriptPath()
         #os.system("ssh -q -i {} -o 'StrictHostKeyChecking no' {}@{} {} /home/{}/{}".format(server_key, user, ip, remove_script_path , user, dir_name))
-        for i in tqdm.tqdm(range(100), colour="green"):
-            time.sleep(0.05)
         print()
         #os.system("ssh -q -i {} -o 'StrictHostKeyChecking no' {}@{} unzip -o /home/{}/{}/.op/{} -d /home/{}/{}/".format(ssh_key_path, user, ip, user, dir_name, zip_name.split(sep="/")[-1], user, dir_name))
         unzip_response = subprocess.run(["ssh", "-q", "-i", "{}".format(server_key), "{}@{}".format(user, ip) , "-o", "StrictHostKeyChecking no", "unzip", "-o", "/home/{}/{}/.op/{}".format(user, dir_name, zip_name.split(sep="/")[-1]), "-d", "/home/{}/{}/".format(user, dir_name)], capture_output=True)
