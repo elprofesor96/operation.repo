@@ -28,8 +28,6 @@ class ConfigHandler:
     def getRemoveScriptPath(self):
         return self.remove_script_path
 
-    #def getSSHKeyFolderPath(self):
-    #    return self.ssh_key_folder_path
          
     def readFolderStructure(self):
         if "FOLDER" in self.sections:
@@ -60,8 +58,9 @@ class ConfigHandler:
         
 
     def readServerConfig(self):
-        audit_server_ip = self.config[self.sections[0]]['opsserver_ip']
-        ssh_key = self.config[self.sections[0]]['ssh_key']
+        if "SERVER" in self.sections:
+            audit_server_ip = self.config["SERVER"]["opsserver_ip"]
+            ssh_key = self.config["SERVER"]["ssh_key"]
         return audit_server_ip, ssh_key
         
     def check_custom_template(self, template):
