@@ -5,7 +5,7 @@ with open('requirements.txt') as f:
 
 setup(
     name="operation.repo",
-    version="2.0.0",
+    version="2.1.0",
     description="operation.repo",
     author="elprofesor96",
     py_modules=["op", "ConfigHandler", "OpClass", "OpClassToServer"],
