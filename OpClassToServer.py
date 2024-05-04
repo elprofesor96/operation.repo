@@ -58,8 +58,8 @@ class OpClassToServer:
 
     def push_repo(self, ip, ssh_key, user):
         self.checkIfServerIsStarted(ip)
-        ssh_key_path = ConfigHandler.ConfigHandler().getSSHKeyFolderPath() + ssh_key
-        self.checkIfUserCanConnect(ssh_key_path, ip, user)
+        server_ip, server_key = ConfigHandler.ConfigHandler().readServerConfig()
+        self.checkIfUserCanConnect(server_key, ip, user)
         if len(ip) < 2:
             print("\n[-] Check ~/.op/op.conf for server configuration.")
             exit()
@@ -69,10 +69,10 @@ class OpClassToServer:
         dir_name = pwd.split(sep="/")[-1]
         print("[*] Pushing repo: {}".format(dir_name))
         print()
-        response = subprocess.run(["ssh", "-q", "-i", "{}".format(ssh_key_path), "{}@{}".format(user,ip), "-o", 'StrictHostKeyChecking no', "mkdir", "-p" ,"{}/.op".format(dir_name)], capture_output=True)
-        os.system("scp -q -i {} -o 'StrictHostKeyChecking no' {} {}@{}:~/{}/.op/".format(ssh_key_path, zip_name, user, ip, dir_name))
+        response = subprocess.run(["ssh", "-q", "-i", "{}".format(server_key), "{}@{}".format(user,ip), "-o", 'StrictHostKeyChecking no', "mkdir", "-p" ,"{}/.op".format(dir_name)], capture_output=True)
+        os.system("scp -q -i {} -o 'StrictHostKeyChecking no' {} {}@{}:~/{}/.op/".format(server_key, zip_name, user, ip, dir_name))
         remove_script_path = ConfigHandler.ConfigHandler().getRemoveScriptPath()
-        os.system("ssh -q -i {} -o 'StrictHostKeyChecking no' {}@{} {} /home/{}/{}".format(ssh_key_path, user, ip, remove_script_path , user, dir_name))
+        os.system("ssh -q -i {} -o 'StrictHostKeyChecking no' {}@{} {} /home/{}/{}".format(server_key, user, ip, remove_script_path , user, dir_name))
         for i in tqdm.tqdm(range(100), colour="green"):
             time.sleep(0.05)
         print()
@@ -82,18 +82,18 @@ class OpClassToServer:
 
     def clone_repo(self, ip, ssh_key, user, repo):
         self.checkIfServerIsStarted(ip)
-        ssh_key_path = ConfigHandler.ConfigHandler().getSSHKeyFolderPath() + ssh_key
+        server_ip, server_key = ConfigHandler.ConfigHandler().readServerConfig()
         if len(ip) < 2:
             print("\n[-] Check /etc/operation.repo/op.conf for server configuration.")
             exit()
         print()
         print("[*] Cloning repo\n")
-        os.system("scp -q -r -i {} {}@{}:~/{} .".format(ssh_key_path, user, ip, repo))
+        os.system("scp -q -r -i {} {}@{}:~/{} .".format(server_key, user, ip, repo))
         for i in tqdm.tqdm(range(100), colour="green"):
             time.sleep(0.05)
         print("\n[+] Repo cloned successgully!")
 
     def cat_readme_from_opsserver(self, ssh_key, user, ip, repo):
-        ssh_key_path = ConfigHandler.ConfigHandler().getSSHKeyFolderPath() + ssh_key
+        ssh_key_path = ""
         output = subprocess.run(["ssh", "-q", "-i", "{}".format(ssh_key_path), "{}@{}".format(user, ip) , "-o", "StrictHostKeyChecking no", "cat", "/home/{}/{}/README.md".format(user, repo)], capture_output=True)
         return output.stdout.decode()

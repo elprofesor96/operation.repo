@@ -2,7 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
-## [v2.0.0] - 2024-4-30
+## [v2.0.1] - 2024-05-04
+- security patch tqdm
+- security patch blinker
+- changes confighandler to read server config from op.conf
+
+
+## [v2.0.0] - 2024-04-30
 - pip3 install from github.com
 - added on elprofesor96/repos homebrew tap to brew install it.
 - fix vulnerabilities snyk
@@ -29,7 +35,7 @@ All notable changes to this project will be documented in this file.
 - REFACTOR and rethink code, redesign for `OP` instead of `AUDIT`
 
 
-## [v1.3.2] - 2022-11-7
+## [v1.3.2] - 2022-11-07
 
 - auditserver
 - audit init
@@ -43,7 +49,7 @@ All notable changes to this project will be documented in this file.
 - Updated dependencies to the latest versions.
 - resolved deleteuser bug
 
-## [v1.3.1] - 2022-11-3
+## [v1.3.1] - 2022-11-03
 
 - Core functionality of the application.
 - audit init skeleton with remove and backup.
