@@ -3,7 +3,6 @@ import subprocess
 import socket
 import time
 import os
-import tqdm
 import OpClass
 
 class OpClassToServer:
@@ -89,8 +88,6 @@ class OpClassToServer:
         print()
         print("[*] Cloning repo\n")
         os.system("scp -q -r -i {} {}@{}:~/{} .".format(server_key, user, ip, repo))
-        for i in tqdm.tqdm(range(100), colour="green"):
-            time.sleep(0.05)
         print("\n[+] Repo cloned successgully!")
 
     def cat_readme_from_opsserver(self, ssh_key, user, ip, repo):

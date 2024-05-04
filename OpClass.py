@@ -3,7 +3,6 @@ from pathlib import Path
 from datetime import datetime
 import zipfile
 import shutil
-import random
 
 class OpClass:
     def __init__(self):
