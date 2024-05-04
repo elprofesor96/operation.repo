@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v2.1.0] - 2024-05-04
+- working opsserver (alpha)
+
 ## [v2.0.1] - 2024-05-04
 - security patch tqdm
 - security patch blinker
