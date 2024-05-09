@@ -12,7 +12,7 @@ This project was inspired from Git command line.
 ```bash
 pip3 install git+https://github.com/elprofesor96/operation.repo
 ```
-- BREW install from elprofesor96/repos tap
+- BREW install from elprofesor96 tap
 ```bash
 brew tap elprofesor96/repos
 ```
@@ -22,7 +22,10 @@ brew update
 ```bash
 brew install operation.repo
 ```
- 
+- APT install from elprofesor96 ppa
+```bash
+
+``` 
 
 
 ## Usage
