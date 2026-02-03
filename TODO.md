@@ -1,6 +1,7 @@
 # Operation Repo TODO
 
 - should implement logging !!!
+- add --version flag to both op and opsserver
 
 ## PATCH
 

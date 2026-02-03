@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v2.1.1] - 2024-05-05
+- remove tqdm
+- easy install with brew
+- 
+
 ## [v2.1.0] - 2024-05-04
 - working opsserver (alpha)
 

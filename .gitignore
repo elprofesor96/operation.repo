@@ -8,3 +8,6 @@ reports
 .venv
 operation.repo.rb
 www
+.DS_Store
+*__pycache__/
+.vscode/

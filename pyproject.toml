@@ -1,0 +1,73 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "operation-repo"
+version = "3.0.0"
+description = "CLI tool to create operation folder repos like Git. Stay organized during pentests, HTB, and dev work."
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "elprofesor96", email = "elprofesor@elprofesor.io"}
+]
+keywords = ["cli", "pentest", "organization", "git-like", "operations", "htb", "security"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Security",
+    "Topic :: Utilities",
+]
+requires-python = ">=3.9"
+dependencies = [
+    "typer[all]>=0.9.0",
+    "rich>=13.0.0",
+    "grip>=4.6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "ruff>=0.1.0",
+    "mypy>=1.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/elprofesor96/operation.repo"
+Documentation = "https://github.com/elprofesor96/operation.repo#readme"
+Repository = "https://github.com/elprofesor96/operation.repo.git"
+Issues = "https://github.com/elprofesor96/operation.repo/issues"
+
+[project.scripts]
+op = "operation_repo.cli:main_cli"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/operation_repo"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "C4"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
