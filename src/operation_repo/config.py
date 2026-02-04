@@ -96,7 +96,7 @@ class ConfigHandler:
             raise SystemExit(1)
 
         try:
-            server_ip = self.config["SERVER"]["opsserver_ip"]
+            server_ip = self.config["SERVER"]["host"]
             ssh_key = self.config["SERVER"]["ssh_key"]
         except KeyError as e:
             console.print(f"[red]✗[/red] Missing config key: {e}")
@@ -117,7 +117,7 @@ class ConfigHandler:
             return
 
         try:
-            ip = self.config["SERVER"].get("opsserver_ip", "").strip("[]")
+            ip = self.config["SERVER"].get("host", "").strip("[]")
             key = self.config["SERVER"].get("ssh_key", "").strip("[]")
         except KeyError:
             console.print("[yellow]No remote configured[/yellow]")
@@ -161,7 +161,7 @@ class ConfigHandler:
             self.config.add_section("SERVER")
 
         if host:
-            self.config.set("SERVER", "opsserver_ip", host)
+            self.config.set("SERVER", "host", host)
         if key:
             # Expand ~ to full path
             key_expanded = str(Path(key).expanduser())
@@ -184,7 +184,7 @@ class ConfigHandler:
     def remove_server_config(self) -> None:
         """Remove server configuration."""
         if "SERVER" in self.config.sections():
-            self.config.set("SERVER", "opsserver_ip", "127.0.0.1")
+            self.config.set("SERVER", "host", "127.0.0.1")
             self.config.set("SERVER", "ssh_key", "/path/to/your/key")
 
             with open(self.config_path, "w") as f:

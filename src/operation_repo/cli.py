@@ -66,7 +66,7 @@ def ensure_op_config() -> None:
         return
 
     default_config = """[SERVER]
-opsserver_ip = 127.0.0.1
+host = 127.0.0.1
 ssh_key = /path/to/your/key
 
 [FOLDER]
@@ -304,13 +304,13 @@ def remote_default(
 
 @remote_app.command("add")
 def remote_add(
-    host: Optional[str] = typer.Option(None, "--host", "-h", help="Server IP / host / domain"),
+    host: Optional[str] = typer.Option(None, "--server", "-s", help="Server IP / domain"),
     key: Optional[str] = typer.Option(None, "--key", "-k", help="Path to SSH key"),
 ) -> None:
     """Add or update remote server configuration."""
     if not host and not key:
-        console.print("[red]✗[/red] Provide at least --host or --key")
-        console.print("  Example: op remote add -h 10.10.10.1 -k ~/.ssh/ops_key")
+        console.print("[red]✗[/red] Provide at least --server or --key")
+        console.print("  Example: op remote add -s 10.10.10.1 -k ~/.ssh/ops_key")
         raise typer.Exit(1)
 
     ConfigHandler().write_server_config(host=host, key=key)
