@@ -122,7 +122,7 @@ class OpClassToServer:
         )
         
         if result.returncode != 0:
-            console.print(f"[red]✗[/red] Failed to connect to server")
+            console.print("[red]✗[/red] Failed to connect to server")
             if result.stderr:
                 console.print(f"    Error: {result.stderr.strip()}")
             return []
@@ -150,24 +150,24 @@ class OpClassToServer:
         
         console.print(f"\n[bold]Pushing '{repo_name}' to {ip}...[/bold]\n")
         
-        # First backup the repo
+        # First export the repo
         from operation_repo.core import OpClass
         op_class = OpClass()
         
         try:
-            backup_path = op_class.backup()
+            export_path = op_class.export(format="zip")
         except SystemExit:
-            console.print("[red]✗[/red] Failed to create backup for push")
+            console.print("[red]✗[/red] Failed to create export for push")
             return False
         
-        # Upload the backup
+        # Upload the export
         remote_path = f"~/{repo_name}.zip"
         
         console.print(f"[cyan]Uploading to {user}@{ip}:{remote_path}...[/cyan]")
         
         success = self._run_scp_upload(
             key=key,
-            local_path=backup_path,
+            local_path=export_path,
             user=user,
             ip=ip,
             remote_path=remote_path
@@ -182,10 +182,10 @@ class OpClassToServer:
                 console.print(f"\n[bold green]✓ Pushed '{repo_name}' successfully![/bold green]")
                 return True
             else:
-                console.print(f"[red]✗[/red] Failed to extract on server")
+                console.print("[red]✗[/red] Failed to extract on server")
                 return False
         else:
-            console.print(f"[red]✗[/red] Failed to upload to server")
+            console.print("[red]✗[/red] Failed to upload to server")
             return False
 
     def clone_repo(self, ip: str, key: str, user: str, repo: str) -> bool:
@@ -212,7 +212,7 @@ class OpClassToServer:
             console.print(f"    Location: {local_path}")
             return True
         else:
-            console.print(f"[red]✗[/red] Failed to clone repo")
+            console.print("[red]✗[/red] Failed to clone repo")
             return False
 
     def cat_readme_from_opsserver(
@@ -234,7 +234,7 @@ class OpClassToServer:
         )
         
         if result.returncode != 0:
-            console.print(f"[red]✗[/red] Failed to fetch README")
+            console.print("[red]✗[/red] Failed to fetch README")
             if result.stderr:
                 console.print(f"    Error: {result.stderr.strip()}")
             raise SystemExit(1)

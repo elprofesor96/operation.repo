@@ -8,9 +8,10 @@ A Git-like CLI tool for organizing operations. Perfect for pentesters, HTB playe
 ## Features
 
 - 📁 **Initialize** operation repos with custom templates
-- 💾 **Backup** your work to timestamped zip files
-- 🧹 **Remove** files while respecting `.opignore`
-- 📊 **Status** check your repo at a glance
+- 🔖 **Commit** snapshots of your work with messages
+- 📦 **Export** to zip, tar.gz with optional encryption
+- 📝 **Notes** quick note-taking during operations
+- 📊 **Status** see repo state and uncommitted changes
 - 🚀 **Push/Clone** to your own ops server
 - 🎨 **Beautiful CLI** with Rich formatting
 
@@ -36,29 +37,82 @@ pip install .
 # Initialize a new op repo
 op init
 
+# Make some changes, then commit
+op commit -m "initial recon complete"
+
 # Check status
 op status
 
-# Backup your work
-op backup
+# Export your work
+op export
 
-# Clean up (respects .opignore)
-op remove
+# View commit history
+op log
 ```
 
 ## Commands
+
+### Core Commands
 
 | Command | Description |
 |---------|-------------|
 | `op init` | Initialize a new op repo |
 | `op init -c web` | Initialize with custom template |
-| `op status` | Show repo status |
-| `op backup` | Create timestamped backup zip |
+| `op status` | Show repo status with change detection |
 | `op remove` | Remove files (respects .opignore) |
-| `op list` | List repos on opsserver |
+
+### Commit System
+
+| Command | Description |
+|---------|-------------|
+| `op commit -m "message"` | Create a snapshot of current state |
+| `op log` | Show commit history |
+| `op log -n 20` | Show last 20 commits |
+| `op diff` | Show changes since last commit |
+| `op diff abc123` | Compare with specific commit |
+| `op show abc123` | Show commit details |
+| `op checkout abc123` | Restore to a specific commit |
+
+### Export
+
+| Command | Description |
+|---------|-------------|
+| `op export` | Export to zip (default) |
+| `op export -f tar.gz` | Export to tar.gz |
+| `op export -e` | Export with GPG encryption |
+| `op export -o backup.zip` | Export to custom path |
+
+### Notes
+
+| Command | Description |
+|---------|-------------|
+| `op notes add "found SQLi"` | Add a quick note |
+| `op notes add "critical" -t vuln -p high` | Add with tag and priority |
+| `op notes list` | List all notes |
+| `op notes list -t vuln` | Filter by tag |
+| `op notes search "SQL"` | Search notes |
+| `op notes done 3` | Mark note #3 as done |
+| `op notes delete 3` | Delete note #3 |
+| `op notes export` | Export to NOTES.md |
+| `op notes clear` | Clear all notes |
+
+### Templates
+
+| Command | Description |
+|---------|-------------|
+| `op template list` | List available templates |
+| `op template show web` | Show template details |
+| `op template create` | Create template interactively |
+| `op template delete web` | Delete a template |
+
+### Server
+
+| Command | Description |
+|---------|-------------|
 | `op push` | Push repo to opsserver |
 | `op clone <repo>` | Clone repo from opsserver |
-| `op view <repo>` | View README from opsserver |
+| `op server list` | List repos on opsserver |
+| `op server view <repo>` | View README from opsserver |
 
 ## Configuration
 
@@ -106,10 +160,12 @@ dirbuster-list.txt = on
 
 Then use: `op init -c web`
 
+Or create interactively: `op template create`
+
 ## .opignore
 
 Files and folders in `.opignore` are:
-- **Excluded** from backups
+- **Excluded** from exports and commits
 - **Preserved** during `op remove`
 
 Example `.opignore`:
@@ -120,18 +176,52 @@ secrets/
 .env
 ```
 
-## Ops Server Setup
+## Repo Structure
 
-To use `push`, `clone`, and `list` commands, set up an ops server:
+After `op init`, your repo looks like:
 
-1. Configure SSH access in `~/.op/op.conf`
-2. Ensure your SSH key has access to the server
-3. Use commands:
-   ```bash
-   op push          # Upload current repo
-   op list          # See all repos
-   op clone myrepo  # Download a repo
-   ```
+```
+my-operation/
+├── .op/
+│   ├── commits/       # Commit snapshots
+│   ├── exports/       # Exported archives
+│   ├── notes.json     # Your notes
+│   └── HEAD           # Current commit pointer
+├── .opignore
+├── README.md
+└── opsdb/
+```
+
+## Workflow Example
+
+```bash
+# Start a new pentest
+mkdir acme-corp && cd acme-corp
+op init -c pentest
+
+# Take notes as you go
+op notes add "target: 10.10.10.1" -t recon
+op notes add "found open port 8080" -t recon
+op notes add "possible SQLi on /login" -t vuln -p high
+
+# Commit your progress
+op commit -m "initial recon complete"
+
+# Continue working...
+op commit -m "exploited SQLi, got user shell"
+
+# Check what changed
+op diff
+
+# View history
+op log
+
+# Export for report
+op export -f zip
+
+# Push to your server
+op push
+```
 
 ## Development
 
@@ -145,7 +235,7 @@ pip install -e ".[dev]"
 pytest
 
 # Lint
-ruff check src/
+ruff check src/operation_repo/
 ```
 
 ## Project Structure
@@ -155,10 +245,13 @@ operation.repo/
 ├── src/
 │   └── operation_repo/
 │       ├── __init__.py
-│       ├── cli.py          # CLI entry point
-│       ├── core.py         # Core operations
+│       ├── cli.py          # Typer CLI entry point
+│       ├── core.py         # Init, export, remove, status
 │       ├── config.py       # Config handling
-│       └── server.py       # Server operations
+│       ├── server.py       # Server operations
+│       ├── commits.py      # Commit system
+│       ├── notes.py        # Notes system
+│       └── templates.py    # Template management
 ├── tests/
 ├── pyproject.toml
 └── README.md
