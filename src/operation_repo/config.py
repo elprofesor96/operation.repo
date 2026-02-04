@@ -91,11 +91,8 @@ class ConfigHandler:
     def read_server_config(self) -> tuple[str, str]:
         """Read server configuration (IP and SSH key)."""
         if "SERVER" not in self.sections:
-            console.print("[red]✗[/red] No [SERVER] section in op.conf")
-            console.print("    Please configure ~/.op/op.conf with:")
-            console.print("    [SERVER]")
-            console.print("    opsserver_ip = your.server.ip")
-            console.print("    ssh_key = /path/to/your/key")
+            console.print("[red]✗[/red] No server configured")
+            console.print("    Use: op remote add -h <host> -k <key>")
             raise SystemExit(1)
         
         try:
@@ -103,6 +100,7 @@ class ConfigHandler:
             ssh_key = self.config["SERVER"]["ssh_key"]
         except KeyError as e:
             console.print(f"[red]✗[/red] Missing config key: {e}")
+            console.print("    Use: op remote add -h <host> -k <key>")
             raise SystemExit(1)
         
         # Remove brackets if present (legacy format)
@@ -110,6 +108,89 @@ class ConfigHandler:
         ssh_key = ssh_key.strip("[]")
         
         return server_ip, ssh_key
+
+    def show_server_config(self) -> None:
+        """Display current server configuration."""
+        if "SERVER" not in self.sections:
+            console.print("[yellow]No remote configured[/yellow]")
+            console.print("  Use: op remote add -h <host> -k <key>")
+            return
+        
+        try:
+            ip = self.config["SERVER"].get("opsserver_ip", "").strip("[]")
+            key = self.config["SERVER"].get("ssh_key", "").strip("[]")
+        except KeyError:
+            console.print("[yellow]No remote configured[/yellow]")
+            return
+
+        is_default_ip = ip in ("127.0.0.1", "")
+        is_default_key = key in ("/path/to/your/key", "")
+
+        from rich.table import Table
+        table = Table(title="Remote Configuration", show_header=False, box=None)
+        table.add_column("Key", style="cyan")
+        table.add_column("Value")
+
+        if is_default_ip:
+            table.add_row("Host", f"[dim]{ip} (not configured)[/dim]")
+        else:
+            table.add_row("Host", f"[green]{ip}[/green]")
+
+        if is_default_key:
+            table.add_row("SSH Key", f"[dim]{key} (not configured)[/dim]")
+        else:
+            # Check if key file exists
+            key_path = Path(key).expanduser()
+            if key_path.exists():
+                table.add_row("SSH Key", f"[green]{key}[/green]")
+            else:
+                table.add_row("SSH Key", f"[red]{key} (file not found)[/red]")
+
+        table.add_row("Config", str(self.config_path))
+
+        console.print(table)
+
+    def write_server_config(
+        self,
+        host: str | None = None,
+        key: str | None = None
+    ) -> None:
+        """Write server configuration to op.conf."""
+        # Ensure SERVER section exists
+        if "SERVER" not in self.config.sections():
+            self.config.add_section("SERVER")
+
+        if host:
+            self.config.set("SERVER", "opsserver_ip", host)
+        if key:
+            # Expand ~ to full path
+            key_expanded = str(Path(key).expanduser())
+            self.config.set("SERVER", "ssh_key", key_expanded)
+
+        # Write config
+        with open(self.config_path, "w") as f:
+            self.config.write(f)
+
+        # Reload
+        self.config.read(self.config_path)
+        self.sections = self.config.sections()
+
+        # Show what was updated
+        if host:
+            console.print(f"[green]✓[/green] Host set to: {host}")
+        if key:
+            console.print(f"[green]✓[/green] SSH key set to: {key}")
+
+    def remove_server_config(self) -> None:
+        """Remove server configuration."""
+        if "SERVER" in self.config.sections():
+            self.config.set("SERVER", "opsserver_ip", "127.0.0.1")
+            self.config.set("SERVER", "ssh_key", "/path/to/your/key")
+
+            with open(self.config_path, "w") as f:
+                self.config.write(f)
+
+            console.print("[green]✓[/green] Remote configuration reset")
 
     def check_custom_template(self, template: str) -> bool:
         """

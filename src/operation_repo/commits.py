@@ -1,7 +1,7 @@
 """
 Commit system for op repo - Git-like snapshots of your operation.
 
-Handles: commit, log, checkout, diff
+Handles: commit, log, restore, diff
 """
 
 import hashlib
@@ -203,7 +203,7 @@ class CommitManager:
         if len(commits) > limit:
             console.print(f"\n[dim]... and {len(commits) - limit} more commits[/dim]")
 
-    def checkout(self, commit_id: str, force: bool = False) -> bool:
+    def restore(self, commit_id: str, force: bool = False) -> bool:
         """Restore files to a specific commit."""
         if not self._is_op_repo():
             console.print("[red]✗[/red] Not an op repo (run 'op init' first)")
@@ -263,7 +263,7 @@ class CommitManager:
         # Update HEAD
         self._set_head(commit_id)
 
-        console.print(f"\n[bold green]✓ Checked out commit {commit_id}[/bold green]")
+        console.print(f"\n[bold green]✓ Restored to commit {commit_id}[/bold green]")
         console.print(f"  {target_commit['file_count']} files restored")
         
         return True
