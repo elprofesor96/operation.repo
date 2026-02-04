@@ -1,7 +1,7 @@
 """
 Commit system for op repo - Git-like snapshots of your operation.
 
-Handles: commit, log, restore, diff
+Handles: commit, log, checkout, diff
 """
 
 import hashlib
@@ -51,14 +51,14 @@ class CommitManager:
         """Get all paths that should be ignored."""
         ignored_lines = self._read_opignore()
         ignored_paths: set[Path] = set()
-        
+
         for line in ignored_lines:
             path = self.pwd / line
             ignored_paths.add(path)
             if path.is_dir():
                 for nested in path.rglob("*"):
                     ignored_paths.add(nested)
-        
+
         return ignored_paths
 
     def _get_tracked_files(self) -> list[Path]:
@@ -95,12 +95,12 @@ class CommitManager:
         """Get all commits in chronological order."""
         if not self.commits_dir.exists():
             return []
-        
+
         commits = []
         for meta_file in self.commits_dir.glob("*.json"):
             with open(meta_file, "r") as f:
                 commits.append(json.load(f))
-        
+
         # Sort by timestamp (newest first)
         commits.sort(key=lambda c: c["timestamp"], reverse=True)
         return commits
@@ -125,11 +125,11 @@ class CommitManager:
             raise SystemExit(1)
 
         self._ensure_commits_dir()
-        
+
         commit_id = self._generate_commit_id()
         timestamp = datetime.now().isoformat()
         parent = self._get_head()
-        
+
         # Get tracked files
         tracked_files = self._get_tracked_files()
         if not tracked_files:
@@ -139,7 +139,7 @@ class CommitManager:
         # Create snapshot zip
         zip_path = self.commits_dir / f"{commit_id}.zip"
         file_list = []
-        
+
         with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zf:
             for file_path in tracked_files:
                 rel_path = file_path.relative_to(self.pwd)
@@ -169,7 +169,7 @@ class CommitManager:
         console.print(f"  [cyan]ID:[/cyan]      {commit_id}")
         console.print(f"  [cyan]Message:[/cyan] {message}")
         console.print(f"  [cyan]Files:[/cyan]   {len(file_list)}")
-        
+
         return commit_id
 
     def log(self, limit: int = 10) -> None:
@@ -187,15 +187,15 @@ class CommitManager:
             return
 
         console.print(Panel("[bold]Commit History[/bold]"))
-        
+
         for i, commit in enumerate(commits[:limit]):
             is_head = commit["id"] == head
             head_marker = " [bold yellow](HEAD)[/bold yellow]" if is_head else ""
-            
+
             # Format timestamp
             ts = datetime.fromisoformat(commit["timestamp"])
             time_str = ts.strftime("%Y-%m-%d %H:%M")
-            
+
             console.print(f"\n[bold cyan]{commit['id']}[/bold cyan]{head_marker}")
             console.print(f"  [dim]{time_str}[/dim] - {commit['message']}")
             console.print(f"  [dim]{commit['file_count']} files[/dim]")
@@ -212,7 +212,7 @@ class CommitManager:
         # Find the commit (support partial IDs)
         commits = self._get_all_commits()
         target_commit = None
-        
+
         for commit in commits:
             if commit["id"].startswith(commit_id):
                 target_commit = commit
@@ -234,7 +234,7 @@ class CommitManager:
             console.print(f"    Message: {target_commit['message']}")
             console.print(f"    Files: {target_commit['file_count']}")
             console.print()
-            
+
             import typer
             confirm = typer.confirm("Continue?")
             if not confirm:
@@ -243,18 +243,18 @@ class CommitManager:
 
         # Extract files from commit
         ignored_paths = self._get_ignored_paths()
-        
+
         with zipfile.ZipFile(zip_path, 'r') as zf:
             for file_info in zf.infolist():
                 target_path = self.pwd / file_info.filename
-                
+
                 # Skip if in ignored paths
                 if target_path in ignored_paths:
                     continue
-                
+
                 # Create parent directories
                 target_path.parent.mkdir(parents=True, exist_ok=True)
-                
+
                 # Extract file
                 with zf.open(file_info) as src:
                     with open(target_path, 'wb') as dst:
@@ -265,7 +265,7 @@ class CommitManager:
 
         console.print(f"\n[bold green]✓ Restored to commit {commit_id}[/bold green]")
         console.print(f"  {target_commit['file_count']} files restored")
-        
+
         return True
 
     def diff(self, commit_id: Optional[str] = None) -> None:
@@ -318,7 +318,7 @@ class CommitManager:
 
         # Display results
         console.print(Panel(f"[bold]Changes since commit {target['id']}[/bold]"))
-        
+
         if not added and not modified and not deleted:
             console.print("[green]✓ No changes[/green]")
             return
@@ -360,24 +360,24 @@ class CommitManager:
 
         # Display commit details
         ts = datetime.fromisoformat(target["timestamp"])
-        
+
         console.print(Panel(f"[bold]Commit {target['id']}[/bold]"))
-        
+
         table = Table(show_header=False, box=None)
         table.add_column("Key", style="cyan")
         table.add_column("Value")
-        
+
         table.add_row("Message", target["message"])
         table.add_row("Author", target["author"])
         table.add_row("Date", ts.strftime("%Y-%m-%d %H:%M:%S"))
         table.add_row("Parent", target["parent"] or "(none)")
         table.add_row("Files", str(target["file_count"]))
-        
+
         console.print(table)
-        
+
         console.print("\n[bold]Files in this commit:[/bold]")
         for f in target["files"][:20]:
             console.print(f"  • {f}")
-        
+
         if len(target["files"]) > 20:
             console.print(f"  [dim]... and {len(target['files']) - 20} more[/dim]")

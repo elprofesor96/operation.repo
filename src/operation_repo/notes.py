@@ -84,7 +84,7 @@ class NotesManager:
         console.print(f"[green]✓[/green] Note #{note_id} added")
         if tag:
             console.print(f"  [cyan]Tag:[/cyan] {tag}")
-        
+
         return note_id
 
     def list_notes(
@@ -137,10 +137,10 @@ class NotesManager:
         for note in notes[:limit]:
             ts = datetime.fromisoformat(note["timestamp"])
             time_str = ts.strftime("%m-%d %H:%M")
-            
+
             done_marker = "[dim]✓[/dim] " if note.get("done") else ""
             content = done_marker + note["content"]
-            
+
             # Truncate long content
             if len(content) > 50:
                 content = content[:47] + "..."
@@ -189,7 +189,7 @@ class NotesManager:
             ts = datetime.fromisoformat(note["timestamp"])
             time_str = ts.strftime("%Y-%m-%d %H:%M")
             tag_str = f" [cyan][{note['tag']}][/cyan]" if note.get("tag") else ""
-            
+
             console.print(f"[bold]#{note['id']}[/bold]{tag_str} - {time_str}")
             console.print(f"  {note['content']}\n")
 
@@ -200,7 +200,7 @@ class NotesManager:
             return False
 
         notes = self._load_notes()
-        
+
         # Find note
         note_idx = None
         for i, n in enumerate(notes):
@@ -217,7 +217,7 @@ class NotesManager:
 
         console.print(f"[green]✓[/green] Deleted note #{note_id}")
         console.print(f"  [dim]{deleted['content'][:50]}...[/dim]" if len(deleted['content']) > 50 else f"  [dim]{deleted['content']}[/dim]")
-        
+
         return True
 
     def done(self, note_id: int) -> bool:
@@ -227,7 +227,7 @@ class NotesManager:
             return False
 
         notes = self._load_notes()
-        
+
         for note in notes:
             if note["id"] == note_id:
                 note["done"] = True
@@ -245,7 +245,7 @@ class NotesManager:
             return False
 
         notes = self._load_notes()
-        
+
         for note in notes:
             if note["id"] == note_id:
                 note["done"] = False
@@ -263,7 +263,7 @@ class NotesManager:
             return False
 
         notes = self._load_notes()
-        
+
         if not notes:
             console.print("[yellow]No notes to clear[/yellow]")
             return True
@@ -286,14 +286,14 @@ class NotesManager:
             raise SystemExit(1)
 
         notes = self._load_notes()
-        
+
         if not notes:
             console.print("[yellow]No notes to export[/yellow]")
             raise SystemExit(1)
 
         # Generate markdown
         lines = ["# Operation Notes\n"]
-        
+
         # Group by tag
         by_tag: dict[str, list] = {"untagged": []}
         for note in notes:
@@ -307,14 +307,14 @@ class NotesManager:
                 lines.append(f"\n## {tag.title()}\n")
             elif by_tag.get("untagged"):
                 lines.append("\n## General Notes\n")
-            
+
             for note in sorted(tag_notes, key=lambda n: n["timestamp"]):
                 ts = datetime.fromisoformat(note["timestamp"])
                 time_str = ts.strftime("%Y-%m-%d %H:%M")
                 done = "~~" if note.get("done") else ""
                 done_end = "~~" if note.get("done") else ""
                 priority_marker = "🔴 " if note.get("priority") == "high" else ""
-                
+
                 lines.append(f"- {priority_marker}{done}{note['content']}{done_end} *({time_str})*")
 
         # Write to file
@@ -325,5 +325,5 @@ class NotesManager:
 
         out_file.write_text("\n".join(lines))
         console.print(f"[green]✓[/green] Notes exported to {out_file}")
-        
+
         return str(out_file)

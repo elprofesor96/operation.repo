@@ -297,7 +297,7 @@ def remote_default(
     # If a subcommand was invoked, skip
     if ctx.invoked_subcommand is not None:
         return
-    
+
     # Default behavior: show config (always, -v is for compat)
     ConfigHandler().show_server_config()
 
@@ -312,7 +312,7 @@ def remote_add(
         console.print("[red]✗[/red] Provide at least --host or --key")
         console.print("  Example: op remote add -h 10.10.10.1 -k ~/.ssh/ops_key")
         raise typer.Exit(1)
-    
+
     ConfigHandler().write_server_config(host=host, key=key)
 
 

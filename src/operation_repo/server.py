@@ -35,7 +35,7 @@ class OpClassToServer:
             f"{user}@{ip}",
             command
         ]
-        
+
         try:
             result = subprocess.run(
                 ssh_cmd,
@@ -65,7 +65,7 @@ class OpClassToServer:
             local_path,
             f"{user}@{ip}:{remote_path}"
         ]
-        
+
         try:
             result = subprocess.run(
                 scp_cmd,
@@ -96,7 +96,7 @@ class OpClassToServer:
             f"{user}@{ip}:{remote_path}",
             local_path
         ]
-        
+
         try:
             result = subprocess.run(
                 scp_cmd,
@@ -112,7 +112,7 @@ class OpClassToServer:
     def list_repos_from_server(self, ip: str, key: str, user: str) -> list[str]:
         """List all repositories on the opsserver."""
         console.print(f"\n[bold]Listing repos from {ip}...[/bold]\n")
-        
+
         # List directories in user's home on the server
         result = self._run_ssh_command(
             key=key,
@@ -120,26 +120,26 @@ class OpClassToServer:
             ip=ip,
             command="ls -1 ~/"
         )
-        
+
         if result.returncode != 0:
             console.print("[red]✗[/red] Failed to connect to server")
             if result.stderr:
                 console.print(f"    Error: {result.stderr.strip()}")
             return []
-        
+
         repos = [line.strip() for line in result.stdout.strip().split("\n") if line.strip()]
-        
+
         if not repos:
             console.print("[yellow]No repos found on server[/yellow]")
             return []
-        
+
         table = Table(title="Repositories on opsserver")
         table.add_column("#", style="cyan", justify="right")
         table.add_column("Name", style="green")
-        
+
         for i, repo in enumerate(repos, 1):
             table.add_row(str(i), repo)
-        
+
         console.print(table)
         return repos
 
@@ -147,24 +147,24 @@ class OpClassToServer:
         """Push the current repo to opsserver."""
         pwd = Path.cwd()
         repo_name = pwd.name
-        
+
         console.print(f"\n[bold]Pushing '{repo_name}' to {ip}...[/bold]\n")
-        
+
         # First export the repo
         from operation_repo.core import OpClass
         op_class = OpClass()
-        
+
         try:
             export_path = op_class.export(format="zip")
         except SystemExit:
             console.print("[red]✗[/red] Failed to create export for push")
             return False
-        
+
         # Upload the export
         remote_path = f"~/{repo_name}.zip"
-        
+
         console.print(f"[cyan]Uploading to {user}@{ip}:{remote_path}...[/cyan]")
-        
+
         success = self._run_scp_upload(
             key=key,
             local_path=export_path,
@@ -172,12 +172,12 @@ class OpClassToServer:
             ip=ip,
             remote_path=remote_path
         )
-        
+
         if success:
             # Extract on server
             extract_cmd = f"cd ~ && unzip -o {repo_name}.zip -d {repo_name} && rm {repo_name}.zip"
             result = self._run_ssh_command(key=key, user=user, ip=ip, command=extract_cmd)
-            
+
             if result.returncode == 0:
                 console.print(f"\n[bold green]✓ Pushed '{repo_name}' successfully![/bold green]")
                 return True
@@ -191,13 +191,13 @@ class OpClassToServer:
     def clone_repo(self, ip: str, key: str, user: str, repo: str) -> bool:
         """Clone a repo from opsserver."""
         console.print(f"\n[bold]Cloning '{repo}' from {ip}...[/bold]\n")
-        
+
         local_path = Path.cwd() / repo
-        
+
         if local_path.exists():
             console.print(f"[red]✗[/red] Directory '{repo}' already exists")
             return False
-        
+
         # Download the repo
         success = self._run_scp_download(
             key=key,
@@ -206,7 +206,7 @@ class OpClassToServer:
             remote_path=f"~/{repo}",
             local_path=str(local_path)
         )
-        
+
         if success:
             console.print(f"\n[bold green]✓ Cloned '{repo}' successfully![/bold green]")
             console.print(f"    Location: {local_path}")
@@ -224,7 +224,7 @@ class OpClassToServer:
     ) -> str:
         """Fetch README.md from a repo on opsserver and save locally."""
         console.print(f"\n[bold]Fetching README from '{repo}'...[/bold]\n")
-        
+
         # Get README content
         result = self._run_ssh_command(
             key=key,
@@ -232,13 +232,13 @@ class OpClassToServer:
             ip=ip,
             command=f"cat ~/{repo}/README.md"
         )
-        
+
         if result.returncode != 0:
             console.print("[red]✗[/red] Failed to fetch README")
             if result.stderr:
                 console.print(f"    Error: {result.stderr.strip()}")
             raise SystemExit(1)
-        
+
         # Save to temp file
         temp_file = tempfile.NamedTemporaryFile(
             mode='w',
@@ -248,6 +248,6 @@ class OpClassToServer:
         )
         temp_file.write(result.stdout)
         temp_file.close()
-        
+
         console.print(f"[green]✓[/green] README saved to {temp_file.name}")
         return temp_file.name
