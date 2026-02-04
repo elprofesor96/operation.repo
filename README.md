@@ -16,12 +16,6 @@ A Git-like CLI tool for organizing operations. Perfect for pentesters, HTB playe
 
 ## Installation
 
-### From PyPI (recommended)
-
-```bash
-pip install operation-repo
-```
-
 ### From GitHub
 
 ```bash
@@ -33,7 +27,7 @@ pip install git+https://github.com/elprofesor96/operation.repo
 ```bash
 git clone https://github.com/elprofesor96/operation.repo
 cd operation.repo
-pip install -e .
+pip install .
 ```
 
 ## Quick Start
