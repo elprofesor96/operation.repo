@@ -16,7 +16,7 @@ from operation_repo.templates import TemplateManager
 
 __all__ = [
     "OpClass",
-    "ConfigHandler", 
+    "ConfigHandler",
     "OpClassToServer",
     "CommitManager",
     "NotesManager",

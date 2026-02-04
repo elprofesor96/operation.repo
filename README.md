@@ -120,7 +120,7 @@ Configuration is stored in `~/.op/op.conf`:
 
 ```ini
 [SERVER]
-opsserver_ip = 192.168.1.100
+host = 192.168.1.100
 ssh_key = ~/.ssh/ops_key
 
 [FOLDER]

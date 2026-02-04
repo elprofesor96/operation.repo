@@ -37,10 +37,12 @@ app = typer.Typer(
 server_app = typer.Typer(help="Server management commands")
 notes_app = typer.Typer(help="Quick note-taking commands")
 template_app = typer.Typer(help="Template management commands")
+remote_app = typer.Typer(help="Remote server configuration")
 
 app.add_typer(server_app, name="server")
 app.add_typer(notes_app, name="notes")
 app.add_typer(template_app, name="template")
+app.add_typer(remote_app, name="remote")
 
 
 # =============================================================================
@@ -64,7 +66,7 @@ def ensure_op_config() -> None:
         return
 
     default_config = """[SERVER]
-opsserver_ip = 127.0.0.1
+host = 127.0.0.1
 ssh_key = /path/to/your/key
 
 [FOLDER]
@@ -161,12 +163,12 @@ def log(
 
 
 @app.command()
-def checkout(
+def restore(
     commit_id: str = typer.Argument(..., help="Commit ID"),
     force: bool = typer.Option(False, "--force", "-f", help="Skip confirmation"),
 ) -> None:
     """Restore to a specific commit."""
-    CommitManager().checkout(commit_id=commit_id, force=force)
+    CommitManager().restore(commit_id=commit_id, force=force)
 
 
 @app.command()
@@ -280,6 +282,48 @@ def template_delete(
 ) -> None:
     """Delete a template."""
     TemplateManager().delete(name=name, force=force)
+
+
+# =============================================================================
+# Remote Commands
+# =============================================================================
+
+@remote_app.callback(invoke_without_command=True)
+def remote_default(
+    ctx: typer.Context,
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Show remote details"),
+) -> None:
+    """Show or configure remote server."""
+    # If a subcommand was invoked, skip
+    if ctx.invoked_subcommand is not None:
+        return
+
+    # Default behavior: show config (always, -v is for compat)
+    ConfigHandler().show_server_config()
+
+
+@remote_app.command("add")
+def remote_add(
+    host: Optional[str] = typer.Option(None, "--server", "-s", help="Server IP / domain"),
+    key: Optional[str] = typer.Option(None, "--key", "-k", help="Path to SSH key"),
+) -> None:
+    """Add or update remote server configuration."""
+    if not host and not key:
+        console.print("[red]✗[/red] Provide at least --server or --key")
+        console.print("  Example: op remote add -s 10.10.10.1 -k ~/.ssh/ops_key")
+        raise typer.Exit(1)
+
+    ConfigHandler().write_server_config(host=host, key=key)
+
+
+@remote_app.command("remove")
+def remote_remove(
+    force: bool = typer.Option(False, "--force", "-f", help="Skip confirmation"),
+) -> None:
+    """Remove remote server configuration."""
+    if not force and not typer.confirm("Reset remote configuration?"):
+        raise typer.Exit()
+    ConfigHandler().remove_server_config()
 
 
 # =============================================================================

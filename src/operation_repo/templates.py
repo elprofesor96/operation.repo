@@ -23,7 +23,7 @@ class TemplateManager:
         self.home_folder = Path.home()
         self.config_path = self.home_folder / ".op" / "op.conf"
         self.config = configparser.ConfigParser()
-        
+
         if self.config_path.exists():
             self.config.read(self.config_path)
 
@@ -36,18 +36,18 @@ class TemplateManager:
     def _get_templates(self) -> dict[str, dict]:
         """Get all custom templates from config."""
         templates: dict[str, dict] = {}
-        
+
         for section in self.config.sections():
             # Skip default sections
             if section in ("SERVER", "FOLDER", "FILE", "DB"):
                 continue
-            
+
             # Parse template name from section (e.g., "WEB_FOLDER" -> "web")
             parts = section.split("_")
             if len(parts) >= 2:
                 template_name = parts[0].lower()
                 section_type = "_".join(parts[1:]).upper()
-                
+
                 if template_name not in templates:
                     templates[template_name] = {
                         "name": template_name,
@@ -55,7 +55,7 @@ class TemplateManager:
                         "files": [],
                         "deployables": []
                     }
-                
+
                 # Parse items in section
                 for key, value in self.config[section].items():
                     if value.lower() in ("on", "true", "yes", "1"):
@@ -65,21 +65,21 @@ class TemplateManager:
                             templates[template_name]["files"].append(key)
                         elif "DEPLOYABLE" in section_type or "DB" in section_type:
                             templates[template_name]["deployables"].append(key)
-        
+
         return templates
 
     def list_templates(self) -> None:
         """List all available templates."""
         templates = self._get_templates()
-        
+
         # Add default template info
         console.print(Panel("[bold]Available Templates[/bold]"))
-        
+
         # Default template
         console.print("\n[bold cyan]default[/bold cyan] (built-in)")
         console.print("  Creates: .op/, .opignore, README.md, opsdb/")
         console.print("  Plus any items in [FOLDER], [FILE], [DB] sections")
-        
+
         if not templates:
             console.print("\n[dim]No custom templates found.[/dim]")
             console.print("[dim]Create one with: op template create[/dim]")
@@ -88,20 +88,20 @@ class TemplateManager:
         # Custom templates
         for name, template in sorted(templates.items()):
             console.print(f"\n[bold cyan]{name}[/bold cyan]")
-            
+
             if template["folders"]:
                 console.print(f"  [green]Folders:[/green] {', '.join(template['folders'])}")
             if template["files"]:
                 console.print(f"  [green]Files:[/green] {', '.join(template['files'])}")
             if template["deployables"]:
                 console.print(f"  [green]Deployables:[/green] {', '.join(template['deployables'])}")
-        
+
         console.print(f"\n[dim]Use: op init -c <template>[/dim]")
 
     def show(self, template_name: str) -> None:
         """Show details of a specific template."""
         templates = self._get_templates()
-        
+
         if template_name == "default":
             console.print(Panel("[bold]Default Template[/bold]"))
             console.print("\nAlways creates:")
@@ -110,13 +110,13 @@ class TemplateManager:
             console.print("  • README.md")
             console.print("  • opsdb/")
             console.print("  • opsdb/index.html")
-            
+
             # Show default config items
             if "FOLDER" in self.config.sections():
                 folders = [k for k, v in self.config["FOLDER"].items() if v.lower() in ("on", "true")]
                 if folders:
                     console.print(f"\n[green]Folders from config:[/green] {', '.join(folders)}")
-            
+
             if "FILE" in self.config.sections():
                 files = [k for k, v in self.config["FILE"].items() if v.lower() in ("on", "true")]
                 if files:
@@ -129,19 +129,19 @@ class TemplateManager:
             return
 
         template = templates[template_name]
-        
+
         console.print(Panel(f"[bold]Template: {template_name}[/bold]"))
-        
+
         if template["folders"]:
             console.print("\n[bold]Folders:[/bold]")
             for f in template["folders"]:
                 console.print(f"  • {f}")
-        
+
         if template["files"]:
             console.print("\n[bold]Files:[/bold]")
             for f in template["files"]:
                 console.print(f"  • {f}")
-        
+
         if template["deployables"]:
             console.print("\n[bold]Deployables:[/bold]")
             for d in template["deployables"]:
@@ -152,14 +152,14 @@ class TemplateManager:
     def create(self) -> None:
         """Interactively create a new template."""
         console.print(Panel("[bold]Create New Template[/bold]"))
-        
+
         # Get template name
         name = Prompt.ask("Template name (e.g., web, pentest, api)").strip().lower()
-        
+
         if not name:
             console.print("[red]✗[/red] Template name required")
             return
-        
+
         if not name.isalnum():
             console.print("[red]✗[/red] Template name must be alphanumeric")
             return
@@ -199,7 +199,7 @@ class TemplateManager:
 
         # Write to config
         self._write_template(name, folders, files, deployables)
-        
+
         console.print(f"\n[bold green]✓ Template '{name}' created![/bold green]")
         console.print(f"  Use: op init -c {name}")
 
@@ -212,7 +212,7 @@ class TemplateManager:
     ) -> None:
         """Write template to config file."""
         name_upper = name.upper()
-        
+
         # Remove existing sections for this template
         for section in list(self.config.sections()):
             if section.startswith(f"{name_upper}_"):
@@ -242,7 +242,7 @@ class TemplateManager:
     def delete(self, name: str, force: bool = False) -> bool:
         """Delete a template."""
         templates = self._get_templates()
-        
+
         if name not in templates:
             console.print(f"[red]✗[/red] Template '{name}' not found")
             return False
@@ -253,7 +253,7 @@ class TemplateManager:
                 return False
 
         name_upper = name.upper()
-        
+
         # Remove sections
         for section in list(self.config.sections()):
             if section.startswith(f"{name_upper}_"):
