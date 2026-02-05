@@ -1,24 +1,12 @@
 # Operation Repo TODO
 
-- should implement logging !!!
-- add --version flag to both op and opsserver
+change the documentation to also say that this tool is also good for making dev products like we build a python app so we make a template to have files like README.md, LICENSE.md, TODO.md, src folder, pyproject.toml, .github/workflows
 
-## PATCH
-
-- remove op.conf from /etc or something like that. maybe need only each user to do it itself in it's home.
-- NEED TO REWORK the op.conf to have default already implemented and in op.conf just the customable ones
 
 ## Dev
 
-- need to find a way to build pip package and host to github
 - need to find a way to autmate CD to build .deb 
 - need to learn how to create brew formulae for macos users (*)
-
-
-## DevOps
-
-- try to publish to github packages and host pip or something
-- testing now how to pip install it
 
 
 ## Security

@@ -2,6 +2,79 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.0.0] - 2026-02-05
+
+### 🚀 Major Rewrite
+
+Complete rewrite from legacy argparse to modern Typer CLI with Rich formatting.
+
+### ✨ New Features
+
+- **Commit System** - Git-like snapshots of your operation
+  - `op commit -m "message"` - Create a snapshot
+  - `op log` - View commit history
+  - `op diff` - Show changes since last commit
+  - `op show <id>` - Show commit details
+  - `op restore <id>` - Restore to a previous commit
+- **Notes System** - Quick note-taking during operations
+  - `op notes add "note"` - Add a note with optional tags and priority
+  - `op notes list` - List, filter, and search notes
+  - `op notes done <id>` - Mark notes as done
+  - `op notes export` - Export to NOTES.md
+- **Template Management** - Create and manage custom templates
+  - `op template list` - List available templates
+  - `op template create` - Interactive template creation
+  - `op template show` - View template details
+  - `op template delete` - Remove a template
+- **Remote Configuration** - Manage server settings from CLI
+  - `op remote` - Show current remote config
+  - `op remote add -h <host> -k <key>` - Add or update remote
+  - `op remote remove` - Reset remote config
+- **Export** - Replaced `op backup` with more powerful export
+  - `op export` - Export to zip (default)
+  - `op export -f tar.gz` - Export to tar.gz
+  - `op export -e` - Encrypt with GPG
+  - `op export -o <path>` - Custom output path
+  - Exports now stored in `.op/exports/`
+
+### 🔧 Improvements
+
+- **Modern CLI** - Replaced argparse with Typer + Rich
+  - Auto-generated help for all commands
+  - Beautiful formatted output with colors and tables
+  - Progress bars for exports
+  - Confirmation prompts for destructive operations
+- **Security** - Replaced `os.system()` with `subprocess.run()` (no shell injection)
+- **Status** - Now shows commits, notes, exports, uncommitted changes
+- **README template** - `op init` now creates a pre-filled README with sections
+- **Error handling** - Specific exceptions instead of bare `except:`
+- **Type hints** - Full type annotations across all modules
+- **Modern packaging** - Migrated from setup.py to pyproject.toml
+
+### 🏗️ Architecture
+
+- `cli.py` - Typer CLI entry point
+- `core.py` - Init, export, remove, status
+- `commits.py` - Commit system
+- `notes.py` - Notes system
+- `templates.py` - Template management
+- `config.py` - Configuration handling
+- `server.py` - Server operations
+
+### 🔄 CI/CD
+
+- GitHub Actions CI with linter, tests across Python 3.9-3.12
+- Dependabot for dependency updates
+- Release workflow for automated GitHub Releases
+
+### ⚠️ Breaking Changes
+
+- `op backup` renamed to `op export`
+- `op list` / `op view` moved to `op server list` / `op server view`
+- Requires Python 3.9+
+- New dependency: `typer[all]>=0.9.0`, `rich>=13.0.0`
+
+
 ## [v2.1.1] - 2024-05-05
 - remove tqdm
 - easy install with brew
