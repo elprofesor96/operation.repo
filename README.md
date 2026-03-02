@@ -264,4 +264,10 @@ operation.repo/
 
 ## License
 
-MIT License - see [LICENSE.md](LICENSE.md)
+[CC BY-NC-ND 4.0](https://creativecommons.org/licenses/by-nc-nd/4.0/) -  [LICENSE.md](LICENSE.md)
+
+Free to use for any purpose — personal, work, research, bug bounty, whatever.  
+
+Just credit me if reference in blog posts and articles. 
+
+Don't sell the tool itself, and don't redistribute modified versions.
