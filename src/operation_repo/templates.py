@@ -6,12 +6,10 @@ Handles: template list, template create, template show
 
 import configparser
 from pathlib import Path
-from typing import Optional
 
 from rich.console import Console
-from rich.table import Table
 from rich.panel import Panel
-from rich.prompt import Prompt, Confirm
+from rich.prompt import Confirm, Prompt
 
 console = Console()
 
@@ -96,7 +94,7 @@ class TemplateManager:
             if template["scripts"]:
                 console.print(f"  [green]Scripts:[/green] {', '.join(template['scripts'])}")
 
-        console.print(f"\n[dim]Use: op init -c <template>[/dim]")
+        console.print("\n[dim]Use: op init -c <template>[/dim]")
 
     def show(self, template_name: str) -> None:
         """Show details of a specific template."""

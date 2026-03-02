@@ -5,7 +5,6 @@ Reads and parses the op.conf file for folder structure, files, and deployables.
 """
 
 import configparser
-import os
 from pathlib import Path
 
 from rich.console import Console
