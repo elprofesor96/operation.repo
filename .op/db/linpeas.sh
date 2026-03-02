@@ -1,2 +1,0 @@
-### super script
-#bash run

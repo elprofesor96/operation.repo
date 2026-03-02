@@ -11,3 +11,5 @@ www
 .DS_Store
 *__pycache__/
 .vscode/
+.claude
+.op
