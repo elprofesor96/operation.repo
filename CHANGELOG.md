@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.1.1] - 2026-03-03
+- delete old opsserver folder and its scripts, deprecated
+- delete ssh folder because that placeholder no longer needed
+- delete .op example folder, examples in readme or blog post
+
 ## [3.1.0] - 2026-03-02
 ### 🔧 Improvements
 - fix linter errors

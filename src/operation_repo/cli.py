@@ -10,6 +10,7 @@ import typer
 from rich.console import Console
 from rich.panel import Panel
 
+from operation_repo import __version__
 from operation_repo.commits import CommitManager
 from operation_repo.config import ConfigHandler
 from operation_repo.core import OpClass
@@ -50,7 +51,7 @@ app.add_typer(remote_app, name="remote")
 
 def version_callback(value: bool) -> None:
     if value:
-        console.print("op version [bold]3.0.0[/bold]")
+        console.print(f"op version [bold]{__version__}[/bold]")
         raise typer.Exit()
 
 
