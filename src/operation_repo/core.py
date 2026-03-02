@@ -3,19 +3,17 @@ Core operations for op repo - init, export, remove, status.
 """
 
 import hashlib
-import os
 import shutil
 import subprocess
 import tarfile
 import zipfile
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 from rich.console import Console
-from rich.table import Table
 from rich.panel import Panel
-from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn
+from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn
+from rich.table import Table
 
 console = Console()
 
@@ -38,7 +36,7 @@ class OpClass:
             console.print("[red]✗[/red] Not an op repo (no .opignore found)")
             raise SystemExit(1)
 
-        with open(opignore_path, "r") as f:
+        with open(opignore_path) as f:
             return [line.strip() for line in f if line.strip()]
 
     def _get_ignored_paths(self) -> set[Path]:
@@ -136,12 +134,12 @@ Operation initialized on {datetime.now().strftime("%Y-%m-%d %H:%M")}.
         console.print(f"[green]✓[/green] [3/{total}] Created {readme_path}")
 
     def create_opsdb(self, total: int = 5) -> None:
-        """Create opsdb folder with index.html."""
-        opsdb_path = self.pwd / "opsdb"
+        """Create opsdb/scripts folder with index.html."""
+        opsdb_path = self.pwd / "scripts"
         index_path = opsdb_path / "index.html"
 
         if opsdb_path.exists():
-            console.print("[yellow]![/yellow] opsdb already exists, skipping")
+            console.print("[yellow]![/yellow] opsdb/scripts already exists, skipping")
             return
 
         opsdb_path.mkdir()
@@ -354,15 +352,15 @@ Operation initialized on {datetime.now().strftime("%Y-%m-%d %H:%M")}.
         self,
         format: str = "zip",
         encrypt: bool = False,
-        password: Optional[str] = None,
-        output: Optional[str] = None
+        password: str | None = None,
+        output: str | None = None
     ) -> str:
         """Export op repo to a file (respects .opignore)."""
         if not self._is_op_repo():
             console.print("[red]✗[/red] Not an op repo (run 'op init' first)")
             raise SystemExit(1)
 
-        ignored_paths = self._get_ignored_paths()
+        #ignored_paths = self._get_ignored_paths()
 
         # Determine output path
         if output:
@@ -439,7 +437,7 @@ Operation initialized on {datetime.now().strftime("%Y-%m-%d %H:%M")}.
                 tf.add(file_path, arcname=relative_path)
                 progress.advance(task)
 
-    def _encrypt_file(self, path: Path, password: Optional[str] = None) -> Path:
+    def _encrypt_file(self, path: Path, password: str | None = None) -> Path:
         """Encrypt a file using GPG."""
         if not password:
             import typer

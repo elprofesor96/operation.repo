@@ -5,7 +5,6 @@ Reads and parses the op.conf file for folder structure, files, and deployables.
 """
 
 import configparser
-import os
 from pathlib import Path
 
 from rich.console import Console
@@ -28,7 +27,7 @@ class ConfigHandler:
         if self.config_path.exists():
             self.config.read(self.config_path)
 
-        self.opsdb_folder_path = self.home_folder / ".op" / "opsdb"
+        self.opsdb_folder_path = self.home_folder / ".op" / "scripts"
         self.sections = self.config.sections()
 
         self.custom_template_sections: list[str] = []
@@ -43,7 +42,7 @@ class ConfigHandler:
         return self.opsdb_folder_path
 
     def get_deployable_folder_path(self) -> Path:
-        """Return the deployable folder path (alias for opsdb)."""
+        """Return the deployable folder path (alias for scripts folder)."""
         return self.opsdb_folder_path
 
     def read_folder_structure(self) -> list[str]:
@@ -101,7 +100,7 @@ class ConfigHandler:
         except KeyError as e:
             console.print(f"[red]✗[/red] Missing config key: {e}")
             console.print("    Use: op remote add -h <host> -k <key>")
-            raise SystemExit(1)
+            raise SystemExit(1) from None
 
         # Remove brackets if present (legacy format)
         server_ip = server_ip.strip("[]")

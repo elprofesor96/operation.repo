@@ -7,12 +7,9 @@ Handles: notes add, notes list, notes search, notes delete
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 from rich.console import Console
 from rich.table import Table
-from rich.panel import Panel
-from rich.markdown import Markdown
 
 console = Console()
 
@@ -33,7 +30,7 @@ class NotesManager:
         """Load notes from file."""
         if not self.notes_file.exists():
             return []
-        with open(self.notes_file, "r") as f:
+        with open(self.notes_file) as f:
             return json.load(f)
 
     def _save_notes(self, notes: list[dict]) -> None:
@@ -51,7 +48,7 @@ class NotesManager:
     def add(
         self,
         content: str,
-        tag: Optional[str] = None,
+        tag: str | None = None,
         priority: str = "normal"
     ) -> int:
         """Add a new note."""
@@ -74,12 +71,12 @@ class NotesManager:
         notes.append(note)
         self._save_notes(notes)
 
-        priority_colors = {
-            "high": "red",
-            "normal": "white",
-            "low": "dim"
-        }
-        color = priority_colors.get(priority, "white")
+        #priority_colors = {
+        #    "high": "red",
+        #    "normal": "white",
+        #    "low": "dim"
+        #}
+        #color = priority_colors.get(priority, "white")
 
         console.print(f"[green]✓[/green] Note #{note_id} added")
         if tag:
@@ -89,7 +86,7 @@ class NotesManager:
 
     def list_notes(
         self,
-        tag: Optional[str] = None,
+        tag: str | None = None,
         show_done: bool = False,
         limit: int = 20
     ) -> None:
@@ -160,7 +157,7 @@ class NotesManager:
 
         # Show available tags
         all_notes = self._load_notes()
-        tags = set(n.get("tag") for n in all_notes if n.get("tag"))
+        tags = {n.get("tag") for n in all_notes if n.get("tag")}
         if tags:
             console.print(f"\n[dim]Tags: {', '.join(sorted(tags))}[/dim]")
 
@@ -279,7 +276,7 @@ class NotesManager:
         console.print(f"[green]✓[/green] Cleared {len(notes)} notes")
         return True
 
-    def export_markdown(self, output_path: Optional[str] = None) -> str:
+    def export_markdown(self, output_path: str | None = None) -> str:
         """Export notes to markdown file."""
         if not self._is_op_repo():
             console.print("[red]✗[/red] Not an op repo (run 'op init' first)")

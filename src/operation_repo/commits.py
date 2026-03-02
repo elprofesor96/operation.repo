@@ -6,17 +6,13 @@ Handles: commit, log, checkout, diff
 
 import hashlib
 import json
-import shutil
 import zipfile
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 from rich.console import Console
-from rich.table import Table
 from rich.panel import Panel
-from rich.syntax import Syntax
-from rich import box
+from rich.table import Table
 
 console = Console()
 
@@ -44,7 +40,7 @@ class CommitManager:
         opignore_path = self.pwd / ".opignore"
         if not opignore_path.exists():
             return []
-        with open(opignore_path, "r") as f:
+        with open(opignore_path) as f:
             return [line.strip() for line in f if line.strip()]
 
     def _get_ignored_paths(self) -> set[Path]:
@@ -73,7 +69,7 @@ class CommitManager:
         hash_input = f"{timestamp}-{self.pwd}"
         return hashlib.sha1(hash_input.encode()).hexdigest()[:7]
 
-    def _get_head(self) -> Optional[str]:
+    def _get_head(self) -> str | None:
         """Get current HEAD commit ID."""
         if not self.head_file.exists():
             return None
@@ -83,12 +79,12 @@ class CommitManager:
         """Set HEAD to a commit ID."""
         self.head_file.write_text(commit_id)
 
-    def _get_commit_metadata(self, commit_id: str) -> Optional[dict]:
+    def _get_commit_metadata(self, commit_id: str) -> dict | None:
         """Get metadata for a commit."""
         meta_file = self.commits_dir / f"{commit_id}.json"
         if not meta_file.exists():
             return None
-        with open(meta_file, "r") as f:
+        with open(meta_file) as f:
             return json.load(f)
 
     def _get_all_commits(self) -> list[dict]:
@@ -98,7 +94,7 @@ class CommitManager:
 
         commits = []
         for meta_file in self.commits_dir.glob("*.json"):
-            with open(meta_file, "r") as f:
+            with open(meta_file) as f:
                 commits.append(json.load(f))
 
         # Sort by timestamp (newest first)
@@ -118,7 +114,7 @@ class CommitManager:
             snapshot[rel_path] = self._file_hash(f)
         return snapshot
 
-    def commit(self, message: str, author: Optional[str] = None) -> str:
+    def commit(self, message: str, author: str | None = None) -> str:
         """Create a new commit snapshot."""
         if not self._is_op_repo():
             console.print("[red]✗[/red] Not an op repo (run 'op init' first)")
@@ -165,7 +161,7 @@ class CommitManager:
         # Update HEAD
         self._set_head(commit_id)
 
-        console.print(Panel(f"[bold green]✓ Commit created[/bold green]"))
+        console.print(Panel("[bold green]✓ Commit created[/bold green]"))
         console.print(f"  [cyan]ID:[/cyan]      {commit_id}")
         console.print(f"  [cyan]Message:[/cyan] {message}")
         console.print(f"  [cyan]Files:[/cyan]   {len(file_list)}")
@@ -188,7 +184,7 @@ class CommitManager:
 
         console.print(Panel("[bold]Commit History[/bold]"))
 
-        for i, commit in enumerate(commits[:limit]):
+        for _i, commit in enumerate(commits[:limit]):
             is_head = commit["id"] == head
             head_marker = " [bold yellow](HEAD)[/bold yellow]" if is_head else ""
 
@@ -268,7 +264,7 @@ class CommitManager:
 
         return True
 
-    def diff(self, commit_id: Optional[str] = None) -> None:
+    def diff(self, commit_id: str | None = None) -> None:
         """Show changes since last commit (or specific commit)."""
         if not self._is_op_repo():
             console.print("[red]✗[/red] Not an op repo (run 'op init' first)")

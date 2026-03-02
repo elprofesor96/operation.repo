@@ -6,12 +6,10 @@ Handles: template list, template create, template show
 
 import configparser
 from pathlib import Path
-from typing import Optional
 
 from rich.console import Console
-from rich.table import Table
 from rich.panel import Panel
-from rich.prompt import Prompt, Confirm
+from rich.prompt import Confirm, Prompt
 
 console = Console()
 
@@ -53,7 +51,7 @@ class TemplateManager:
                         "name": template_name,
                         "folders": [],
                         "files": [],
-                        "deployables": []
+                        "scripts": []
                     }
 
                 # Parse items in section
@@ -63,8 +61,8 @@ class TemplateManager:
                             templates[template_name]["folders"].append(key)
                         elif "FILE" in section_type:
                             templates[template_name]["files"].append(key)
-                        elif "DEPLOYABLE" in section_type or "DB" in section_type:
-                            templates[template_name]["deployables"].append(key)
+                        elif "SCRIPTS" in section_type or "DB" in section_type:
+                            templates[template_name]["scripts"].append(key)
 
         return templates
 
@@ -77,8 +75,8 @@ class TemplateManager:
 
         # Default template
         console.print("\n[bold cyan]default[/bold cyan] (built-in)")
-        console.print("  Creates: .op/, .opignore, README.md, opsdb/")
-        console.print("  Plus any items in [FOLDER], [FILE], [DB] sections")
+        console.print("  Creates: .op/, .opignore, README.md, scripts/")
+        console.print("  Plus any items in [FOLDER], [FILE], [SCRIPTS] sections")
 
         if not templates:
             console.print("\n[dim]No custom templates found.[/dim]")
@@ -93,10 +91,10 @@ class TemplateManager:
                 console.print(f"  [green]Folders:[/green] {', '.join(template['folders'])}")
             if template["files"]:
                 console.print(f"  [green]Files:[/green] {', '.join(template['files'])}")
-            if template["deployables"]:
-                console.print(f"  [green]Deployables:[/green] {', '.join(template['deployables'])}")
+            if template["scripts"]:
+                console.print(f"  [green]Scripts:[/green] {', '.join(template['scripts'])}")
 
-        console.print(f"\n[dim]Use: op init -c <template>[/dim]")
+        console.print("\n[dim]Use: op init -c <template>[/dim]")
 
     def show(self, template_name: str) -> None:
         """Show details of a specific template."""
@@ -108,8 +106,8 @@ class TemplateManager:
             console.print("  • .op/")
             console.print("  • .opignore")
             console.print("  • README.md")
-            console.print("  • opsdb/")
-            console.print("  • opsdb/index.html")
+            console.print("  • scripts/")
+            console.print("  • scripts/index.html")
 
             # Show default config items
             if "FOLDER" in self.config.sections():
@@ -142,9 +140,9 @@ class TemplateManager:
             for f in template["files"]:
                 console.print(f"  • {f}")
 
-        if template["deployables"]:
-            console.print("\n[bold]Deployables:[/bold]")
-            for d in template["deployables"]:
+        if template["scripts"]:
+            console.print("\n[bold]Scripts:[/bold]")
+            for d in template["scripts"]:
                 console.print(f"  • {d}")
 
         console.print(f"\n[dim]Use: op init -c {template_name}[/dim]")
@@ -181,9 +179,9 @@ class TemplateManager:
         files_input = Prompt.ask("Files", default="")
         files = [f.strip() for f in files_input.split(",") if f.strip()]
 
-        # Get deployables
-        console.print("\n[bold]Deployables to copy[/bold] (from ~/.op/opsdb/, comma-separated)")
-        deploy_input = Prompt.ask("Deployables", default="")
+        # Get scripts
+        console.print("\n[bold]Scripts to copy[/bold] (from ~/.op/scripts/, comma-separated)")
+        deploy_input = Prompt.ask("Scripts", default="")
         deployables = [d.strip() for d in deploy_input.split(",") if d.strip()]
 
         # Confirm
@@ -191,7 +189,7 @@ class TemplateManager:
         console.print(f"  Name: {name}")
         console.print(f"  Folders: {folders or '(none)'}")
         console.print(f"  Files: {files or '(none)'}")
-        console.print(f"  Deployables: {deployables or '(none)'}")
+        console.print(f"  Scripts: {deployables or '(none)'}")
 
         if not Confirm.ask("\nCreate this template?"):
             console.print("[yellow]Cancelled[/yellow]")
@@ -221,7 +219,7 @@ class TemplateManager:
         # Add new sections
         folder_section = f"{name_upper}_FOLDER"
         file_section = f"{name_upper}_FILE"
-        deploy_section = f"{name_upper}_DEPLOYABLE"
+        deploy_section = f"{name_upper}_SCRIPTS"
 
         self.config.add_section(folder_section)
         for f in folders:

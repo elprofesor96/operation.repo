@@ -4,18 +4,17 @@ Operation Repo CLI - Main entry point using Typer.
 A Git-like tool for organizing operations, pentests, and projects.
 """
 
-import typer
 from pathlib import Path
-from typing import Optional
 
+import typer
 from rich.console import Console
 from rich.panel import Panel
 
-from operation_repo.core import OpClass
-from operation_repo.config import ConfigHandler
-from operation_repo.server import OpClassToServer
 from operation_repo.commits import CommitManager
+from operation_repo.config import ConfigHandler
+from operation_repo.core import OpClass
 from operation_repo.notes import NotesManager
+from operation_repo.server import OpClassToServer
 from operation_repo.templates import TemplateManager
 
 # Initialize console
@@ -60,7 +59,7 @@ def ensure_op_config() -> None:
     home_folder = config_handler.get_home_folder()
     op_dir = Path(home_folder) / ".op"
     op_conf = op_dir / "op.conf"
-    opsdb_dir = op_dir / "opsdb"
+    opsdb_dir = op_dir / "scripts"
 
     if op_dir.exists():
         return
@@ -75,8 +74,8 @@ ssh_key = /path/to/your/key
 [FILE]
 # files to create (name = on)
 
-[DB]
-# deployables from ~/.op/opsdb/ (name = on)
+[SCRIPTS]
+# deployables from ~/.op/scripts/ (name = on)
 """
     try:
         op_dir.mkdir(parents=True, exist_ok=True)
@@ -100,7 +99,7 @@ def main(
 
 @app.command()
 def init(
-    custom: Optional[str] = typer.Option(None, "--custom", "-c", help="Use custom template"),
+    custom: str | None = typer.Option(None, "--custom", "-c", help="Use custom template"),
 ) -> None:
     """Initialize a new op repo."""
     config_handler = ConfigHandler()
@@ -123,7 +122,7 @@ def status() -> None:
 def export(
     format: str = typer.Option("zip", "--format", "-f", help="Format: zip, tar.gz, tar"),
     encrypt: bool = typer.Option(False, "--encrypt", "-e", help="Encrypt with GPG"),
-    output: Optional[str] = typer.Option(None, "--output", "-o", help="Output path"),
+    output: str | None = typer.Option(None, "--output", "-o", help="Output path"),
 ) -> None:
     """Export op repo (respects .opignore)."""
     console.print(Panel(f"[bold blue]Exporting ({format})[/bold blue]"))
@@ -148,7 +147,7 @@ def remove(
 @app.command()
 def commit(
     message: str = typer.Option(..., "--message", "-m", help="Commit message"),
-    author: Optional[str] = typer.Option(None, "--author", "-a", help="Author name"),
+    author: str | None = typer.Option(None, "--author", "-a", help="Author name"),
 ) -> None:
     """Create a snapshot of current state."""
     CommitManager().commit(message=message, author=author)
@@ -173,7 +172,7 @@ def restore(
 
 @app.command()
 def diff(
-    commit_id: Optional[str] = typer.Argument(None, help="Compare with commit (default: HEAD)"),
+    commit_id: str | None = typer.Argument(None, help="Compare with commit (default: HEAD)"),
 ) -> None:
     """Show changes since last commit."""
     CommitManager().diff(commit_id=commit_id)
@@ -194,7 +193,7 @@ def show(
 @notes_app.command("add")
 def notes_add(
     content: str = typer.Argument(..., help="Note content"),
-    tag: Optional[str] = typer.Option(None, "--tag", "-t", help="Tag for the note"),
+    tag: str | None = typer.Option(None, "--tag", "-t", help="Tag for the note"),
     priority: str = typer.Option("normal", "--priority", "-p", help="Priority: high, normal, low"),
 ) -> None:
     """Add a quick note."""
@@ -203,7 +202,7 @@ def notes_add(
 
 @notes_app.command("list")
 def notes_list(
-    tag: Optional[str] = typer.Option(None, "--tag", "-t", help="Filter by tag"),
+    tag: str | None = typer.Option(None, "--tag", "-t", help="Filter by tag"),
     all: bool = typer.Option(False, "--all", "-a", help="Include done notes"),
     limit: int = typer.Option(20, "--limit", "-n", help="Max notes to show"),
 ) -> None:
@@ -237,7 +236,7 @@ def notes_delete(
 
 @notes_app.command("export")
 def notes_export(
-    output: Optional[str] = typer.Option(None, "--output", "-o", help="Output file"),
+    output: str | None = typer.Option(None, "--output", "-o", help="Output file"),
 ) -> None:
     """Export notes to markdown."""
     NotesManager().export_markdown(output_path=output)
@@ -304,8 +303,8 @@ def remote_default(
 
 @remote_app.command("add")
 def remote_add(
-    host: Optional[str] = typer.Option(None, "--server", "-s", help="Server IP / domain"),
-    key: Optional[str] = typer.Option(None, "--key", "-k", help="Path to SSH key"),
+    host: str | None = typer.Option(None, "--server", "-s", help="Server IP / domain"),
+    key: str | None = typer.Option(None, "--key", "-k", help="Path to SSH key"),
 ) -> None:
     """Add or update remote server configuration."""
     if not host and not key:

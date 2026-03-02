@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.1.0] - 2026-03-02
+### 🔧 Improvements
+- fix linter errors
+- add license (CC BY-NC-ND 4.0)
+- removed deprecated files (Utils.py)
+- refactor opsdb naming to scripts
+
 ## [3.0.0] - 2026-02-05
 
 ### 🚀 Major Rewrite
