@@ -100,7 +100,7 @@ class ConfigHandler:
         except KeyError as e:
             console.print(f"[red]✗[/red] Missing config key: {e}")
             console.print("    Use: op remote add -h <host> -k <key>")
-            raise SystemExit(1)
+            raise SystemExit(1) from None
 
         # Remove brackets if present (legacy format)
         server_ip = server_ip.strip("[]")

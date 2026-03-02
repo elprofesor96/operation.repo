@@ -71,12 +71,12 @@ class NotesManager:
         notes.append(note)
         self._save_notes(notes)
 
-        priority_colors = {
-            "high": "red",
-            "normal": "white",
-            "low": "dim"
-        }
-        color = priority_colors.get(priority, "white")
+        #priority_colors = {
+        #    "high": "red",
+        #    "normal": "white",
+        #    "low": "dim"
+        #}
+        #color = priority_colors.get(priority, "white")
 
         console.print(f"[green]✓[/green] Note #{note_id} added")
         if tag:
@@ -157,7 +157,7 @@ class NotesManager:
 
         # Show available tags
         all_notes = self._load_notes()
-        tags = set(n.get("tag") for n in all_notes if n.get("tag"))
+        tags = {n.get("tag") for n in all_notes if n.get("tag")}
         if tags:
             console.print(f"\n[dim]Tags: {', '.join(sorted(tags))}[/dim]")
 

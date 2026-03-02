@@ -184,7 +184,7 @@ class CommitManager:
 
         console.print(Panel("[bold]Commit History[/bold]"))
 
-        for i, commit in enumerate(commits[:limit]):
+        for _i, commit in enumerate(commits[:limit]):
             is_head = commit["id"] == head
             head_marker = " [bold yellow](HEAD)[/bold yellow]" if is_head else ""
 

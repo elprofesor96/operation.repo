@@ -360,7 +360,7 @@ Operation initialized on {datetime.now().strftime("%Y-%m-%d %H:%M")}.
             console.print("[red]✗[/red] Not an op repo (run 'op init' first)")
             raise SystemExit(1)
 
-        ignored_paths = self._get_ignored_paths()
+        #ignored_paths = self._get_ignored_paths()
 
         # Determine output path
         if output:

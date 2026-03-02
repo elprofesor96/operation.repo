@@ -46,7 +46,7 @@ class OpClassToServer:
             return result
         except FileNotFoundError:
             console.print("[red]✗[/red] SSH not found. Please install OpenSSH.")
-            raise SystemExit(1)
+            raise SystemExit(1) from None
 
     def _run_scp_upload(
         self,
@@ -76,7 +76,7 @@ class OpClassToServer:
             return result.returncode == 0
         except FileNotFoundError:
             console.print("[red]✗[/red] SCP not found. Please install OpenSSH.")
-            raise SystemExit(1)
+            raise SystemExit(1) from None
 
     def _run_scp_download(
         self,
@@ -107,7 +107,7 @@ class OpClassToServer:
             return result.returncode == 0
         except FileNotFoundError:
             console.print("[red]✗[/red] SCP not found. Please install OpenSSH.")
-            raise SystemExit(1)
+            raise SystemExit(1) from None
 
     def list_repos_from_server(self, ip: str, key: str, user: str) -> list[str]:
         """List all repositories on the opsserver."""
