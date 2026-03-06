@@ -87,26 +87,29 @@ class ConfigHandler:
 
         return self.enabled_deployable
 
-    def read_server_config(self) -> tuple[str, str]:
-        """Read server configuration (IP and SSH key)."""
+    def read_server_config(self) -> tuple[str, str, int]:
+        """Read server configuration (host, SSH key, port)."""
         if "SERVER" not in self.sections:
-            console.print("[red]✗[/red] No server configured")
-            console.print("    Use: op remote add -h <host> -k <key>")
+            console.print("[red]x[/red] No server configured")
+            console.print("    Use: op remote add -s <host> -k <key>")
             raise SystemExit(1)
 
         try:
             server_ip = self.config["SERVER"]["host"]
             ssh_key = self.config["SERVER"]["ssh_key"]
         except KeyError as e:
-            console.print(f"[red]✗[/red] Missing config key: {e}")
-            console.print("    Use: op remote add -h <host> -k <key>")
+            console.print(f"[red]x[/red] Missing config key: {e}")
+            console.print("    Use: op remote add -s <host> -k <key>")
             raise SystemExit(1) from None
 
         # Remove brackets if present (legacy format)
         server_ip = server_ip.strip("[]")
         ssh_key = ssh_key.strip("[]")
 
-        return server_ip, ssh_key
+        # Port (default 2222)
+        port = int(self.config["SERVER"].get("ssh_port", "2222"))
+
+        return server_ip, ssh_key, port
 
     def show_server_config(self) -> None:
         """Display current server configuration."""
@@ -145,6 +148,8 @@ class ConfigHandler:
             else:
                 table.add_row("SSH Key", f"[red]{key} (file not found)[/red]")
 
+        port = self.config["SERVER"].get("ssh_port", "2222")
+        table.add_row("SSH Port", port)
         table.add_row("Config", str(self.config_path))
 
         console.print(table)
@@ -152,7 +157,8 @@ class ConfigHandler:
     def write_server_config(
         self,
         host: str | None = None,
-        key: str | None = None
+        key: str | None = None,
+        port: int | None = None
     ) -> None:
         """Write server configuration to op.conf."""
         # Ensure SERVER section exists
@@ -165,6 +171,8 @@ class ConfigHandler:
             # Expand ~ to full path
             key_expanded = str(Path(key).expanduser())
             self.config.set("SERVER", "ssh_key", key_expanded)
+        if port is not None:
+            self.config.set("SERVER", "ssh_port", str(port))
 
         # Write config
         with open(self.config_path, "w") as f:
@@ -176,9 +184,11 @@ class ConfigHandler:
 
         # Show what was updated
         if host:
-            console.print(f"[green]✓[/green] Host set to: {host}")
+            console.print(f"[green]ok[/green] Host set to: {host}")
         if key:
-            console.print(f"[green]✓[/green] SSH key set to: {key}")
+            console.print(f"[green]ok[/green] SSH key set to: {key}")
+        if port is not None:
+            console.print(f"[green]ok[/green] SSH port set to: {port}")
 
     def remove_server_config(self) -> None:
         """Remove server configuration."""

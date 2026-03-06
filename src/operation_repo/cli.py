@@ -306,14 +306,15 @@ def remote_default(
 def remote_add(
     host: str | None = typer.Option(None, "--server", "-s", help="Server IP / domain"),
     key: str | None = typer.Option(None, "--key", "-k", help="Path to SSH key"),
+    port: int | None = typer.Option(None, "--port", "-p", help="SSH port (default: 2222)"),
 ) -> None:
     """Add or update remote server configuration."""
-    if not host and not key:
-        console.print("[red]✗[/red] Provide at least --server or --key")
-        console.print("  Example: op remote add -s 10.10.10.1 -k ~/.ssh/ops_key")
+    if not host and not key and port is None:
+        console.print("[red]x[/red] Provide at least --server or --key")
+        console.print("  Example: op remote add -s 10.10.10.1 -k ~/.ssh/id_ed25519")
         raise typer.Exit(1)
 
-    ConfigHandler().write_server_config(host=host, key=key)
+    ConfigHandler().write_server_config(host=host, key=key, port=port)
 
 
 @remote_app.command("remove")
@@ -334,19 +335,44 @@ def remote_remove(
 def server_list() -> None:
     """List repos on opsserver."""
     config = ConfigHandler()
-    ip, key = config.read_server_config()
-    user = Path(key).stem.split("_")[0]
-    OpClassToServer().list_repos_from_server(ip, key, user)
+    host, key, port = config.read_server_config()
+    OpClassToServer().list_repos(host, key, port=port)
 
 
 @server_app.command("view")
 def server_view(repo: str = typer.Argument(..., help="Repo name")) -> None:
-    """View README from opsserver."""
+    """View repo details from opsserver."""
     config = ConfigHandler()
-    ip, key = config.read_server_config()
-    user = Path(key).stem.split("_")[0]
-    readme = OpClassToServer().cat_readme_from_opsserver(key, user, ip, repo)
-    OpClass().view(readme)
+    host, key, port = config.read_server_config()
+    OpClassToServer().view_repo(host, key, repo, port=port)
+
+
+@server_app.command("pushes")
+def server_pushes(repo: str = typer.Argument(..., help="Repo name")) -> None:
+    """List push history for a repo."""
+    config = ConfigHandler()
+    host, key, port = config.read_server_config()
+    OpClassToServer().list_pushes(host, key, repo, port=port)
+
+
+@server_app.command("diff")
+def server_diff(
+    repo: str = typer.Argument(..., help="Repo name"),
+    from_ver: int = typer.Argument(..., help="From version"),
+    to_ver: int = typer.Argument(..., help="To version"),
+) -> None:
+    """Diff two push versions."""
+    config = ConfigHandler()
+    host, key, port = config.read_server_config()
+    OpClassToServer().diff_versions(host, key, repo, from_ver, to_ver, port=port)
+
+
+@server_app.command("verify")
+def server_verify() -> None:
+    """Test SSH connection to opsserver."""
+    config = ConfigHandler()
+    host, key, port = config.read_server_config()
+    OpClassToServer().verify_connection(host, key, port=port)
 
 
 # =============================================================================
@@ -354,21 +380,27 @@ def server_view(repo: str = typer.Argument(..., help="Repo name")) -> None:
 # =============================================================================
 
 @app.command("push")
-def push() -> None:
+def push(
+    message: str = typer.Option("", "--message", "-m", help="Push message"),
+) -> None:
     """Push repo to opsserver."""
     config = ConfigHandler()
-    ip, key = config.read_server_config()
-    user = Path(key).stem.split("_")[0]
-    OpClassToServer().push_repo(ip, key, user)
+    host, key, port = config.read_server_config()
+    if message:
+        OpClassToServer().push_repo_with_message(host, key, message, port=port)
+    else:
+        OpClassToServer().push_repo(host, key, port=port)
 
 
 @app.command("clone")
-def clone(repo: str = typer.Argument(..., help="Repo name")) -> None:
+def clone(
+    repo: str = typer.Argument(..., help="Repo name"),
+    version: str | None = typer.Option(None, "--version", "-v", help="Version number"),
+) -> None:
     """Clone repo from opsserver."""
     config = ConfigHandler()
-    ip, key = config.read_server_config()
-    user = Path(key).stem.split("_")[0]
-    OpClassToServer().clone_repo(ip, key, user, repo)
+    host, key, port = config.read_server_config()
+    OpClassToServer().clone_repo(host, key, repo, version=version, port=port)
 
 
 # =============================================================================
