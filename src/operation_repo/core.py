@@ -511,15 +511,3 @@ Operation initialized on {datetime.now().strftime("%Y-%m-%d %H:%M")}.
         console.print(f"\n[bold green]✓ Removed {removed_count} items[/bold green]")
         return True
 
-    def view(self, readme_path: str) -> None:
-        """View a README file using grip (GitHub-flavored markdown)."""
-        try:
-            subprocess.run(
-                ["grip", "-b", readme_path],
-                check=True,
-                capture_output=False
-            )
-        except FileNotFoundError:
-            console.print("[red]✗[/red] 'grip' not found. Install with: pip install grip")
-        except subprocess.CalledProcessError as e:
-            console.print(f"[red]✗[/red] Error running grip: {e}")
