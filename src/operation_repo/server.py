@@ -19,6 +19,11 @@ from rich.table import Table
 console = Console()
 
 
+class UnknownHostKeyError(Exception):
+    """Raised when the server host key is not in known_hosts."""
+    pass
+
+
 class SSHConnection:
     """Manages a paramiko SSH connection to opsserver."""
 
@@ -29,7 +34,10 @@ class SSHConnection:
         self._client: paramiko.SSHClient | None = None
 
     def connect(self) -> paramiko.SSHClient:
-        """Establish SSH connection using public key auth."""
+        """Establish SSH connection using public key auth.
+
+        Raises UnknownHostKeyError if the host key is not trusted.
+        """
         if self._client is not None:
             return self._client
 
@@ -39,7 +47,16 @@ class SSHConnection:
             raise SystemExit(1)
 
         client = paramiko.SSHClient()
-        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+        # Load known hosts from ~/.op/known_hosts (opsserver-specific)
+        # Falls back to system known_hosts, rejects unknown hosts
+        known_hosts = Path.home() / ".op" / "known_hosts"
+        if known_hosts.exists():
+            client.load_host_keys(str(known_hosts))
+        system_known_hosts = Path.home() / ".ssh" / "known_hosts"
+        if system_known_hosts.exists():
+            client.load_system_host_keys(str(system_known_hosts))
+        client.set_missing_host_key_policy(paramiko.RejectPolicy())
 
         try:
             pkey = self._load_key(str(key_file))
@@ -54,7 +71,12 @@ class SSHConnection:
         except paramiko.AuthenticationException:
             console.print("[red]x[/red] Authentication failed. Check your SSH key.")
             raise SystemExit(1) from None
-        except (paramiko.SSHException, OSError) as e:
+        except paramiko.SSHException as e:
+            if "not found in known_hosts" in str(e) or "Unknown server" in str(e):
+                raise UnknownHostKeyError(self.host, self.port) from None
+            console.print(f"[red]x[/red] Connection failed: {e}")
+            raise SystemExit(1) from None
+        except OSError as e:
             console.print(f"[red]x[/red] Connection failed: {e}")
             raise SystemExit(1) from None
 
@@ -222,12 +244,39 @@ class OpClassToServer:
     def _get_connection(self, host: str, key: str, port: int = 2222) -> SSHConnection:
         return SSHConnection(host=host, key_path=key, port=port)
 
-    def verify_connection(self, host: str, key: str, port: int = 2222) -> bool:
-        """Test SSH auth (like ssh -T git@github.com)."""
+    def _connect_or_fail(self, host: str, key: str, port: int = 2222) -> SSHConnection:
+        """Connect, printing a helpful message if host key is unknown."""
         conn = self._get_connection(host, key, port)
         try:
-            # A shell request with no command triggers the server greeting
+            conn.connect()
+        except UnknownHostKeyError:
+            console.print(f"[red]x[/red] Unknown host key for {host}:{port}")
+            console.print("    Run: [cyan]op server verify[/cyan]")
+            raise SystemExit(1) from None
+        return conn
+
+    def verify_connection(self, host: str, key: str, port: int = 2222) -> bool:
+        """Test SSH auth — handles host key trust on first connect."""
+        known_hosts_path = Path.home() / ".op" / "known_hosts"
+
+        # First, check if we already trust this host
+        conn = self._get_connection(host, key, port)
+        try:
             client = conn.connect()
+        except UnknownHostKeyError:
+            # Host key unknown — offer to trust it
+            conn.close()
+            if not self._trust_host_key(host, port, known_hosts_path):
+                return False
+            # Retry with the now-trusted key
+            conn = self._get_connection(host, key, port)
+            try:
+                client = conn.connect()
+            except (paramiko.SSHException, OSError, UnknownHostKeyError) as e:
+                console.print(f"[red]x[/red] Connection failed: {e}")
+                return False
+
+        try:
             transport = client.get_transport()
             if transport is None:
                 return False
@@ -254,6 +303,51 @@ class OpClassToServer:
             return False
         finally:
             conn.close()
+
+    @staticmethod
+    def _trust_host_key(host: str, port: int, known_hosts_path: Path) -> bool:
+        """Fetch server host key, show fingerprint, ask user to trust it."""
+        console.print(f"\n[yellow]Unknown host key for {host}:{port}[/yellow]\n")
+
+        # Fetch the host key via a raw socket + transport
+        try:
+            import socket
+            sock = socket.create_connection((host, port), timeout=10)
+            transport = paramiko.Transport(sock)
+            transport.connect()
+            host_key = transport.get_remote_server_key()
+            transport.close()
+            sock.close()
+        except (OSError, paramiko.SSHException) as e:
+            console.print(f"[red]x[/red] Could not fetch host key: {e}")
+            return False
+
+        key_type = host_key.get_name()
+        fingerprint = _key_fingerprint(host_key)
+
+        console.print(f"  Host:        {host}:{port}")
+        console.print(f"  Key type:    {key_type}")
+        console.print(f"  Fingerprint: {fingerprint}")
+        console.print()
+
+        import typer
+        if not typer.confirm("Trust this host key?"):
+            console.print("[red]x[/red] Host key rejected")
+            return False
+
+        # Save to ~/.op/known_hosts
+        known_hosts_path.parent.mkdir(parents=True, exist_ok=True)
+
+        # Format: [host]:port key_type base64_key
+        host_entry = f"[{host}]:{port}" if port != 22 else host
+        key_b64 = host_key.get_base64()
+        line = f"{host_entry} {key_type} {key_b64}\n"
+
+        with open(known_hosts_path, "a") as f:
+            f.write(line)
+
+        console.print(f"[green]ok[/green] Host key saved to {known_hosts_path}")
+        return True
 
     def push_repo(self, host: str, key: str, port: int = 2222) -> bool:
         """Push the current repo to opsserver via SSH."""
@@ -285,7 +379,7 @@ class OpClassToServer:
                 "message": "",
             }
 
-            conn = self._get_connection(host, key, port)
+            conn = self._connect_or_fail(host, key, port)
             try:
                 exit_code, stdout, stderr = conn.exec_push(
                     command=f"push {repo_name}",
@@ -336,7 +430,7 @@ class OpClassToServer:
                 "message": message,
             }
 
-            conn = self._get_connection(host, key, port)
+            conn = self._connect_or_fail(host, key, port)
             try:
                 exit_code, stdout, stderr = conn.exec_push(
                     command=f"push {repo_name}",
@@ -377,7 +471,7 @@ class OpClassToServer:
         tmp_fd, tmp_path = tempfile.mkstemp(suffix=".tar.gz", prefix="op-clone-")
         os.close(tmp_fd)
 
-        conn = self._get_connection(host, key, port)
+        conn = self._connect_or_fail(host, key, port)
         try:
             exit_code, stderr = conn.exec_clone(command=cmd, dest_path=tmp_path)
         finally:
@@ -417,7 +511,7 @@ class OpClassToServer:
         """List all repos on opsserver."""
         console.print(f"\n[bold]Listing repos from {host}:{port}...[/bold]\n")
 
-        conn = self._get_connection(host, key, port)
+        conn = self._connect_or_fail(host, key, port)
         try:
             exit_code, stdout, stderr = conn.exec_command("list")
         finally:
@@ -458,7 +552,7 @@ class OpClassToServer:
         """View repo metadata and README from opsserver."""
         console.print(f"\n[bold]Viewing '{repo}' on {host}:{port}...[/bold]\n")
 
-        conn = self._get_connection(host, key, port)
+        conn = self._connect_or_fail(host, key, port)
         try:
             exit_code, stdout, stderr = conn.exec_command(f"view {repo}")
         finally:
@@ -484,7 +578,7 @@ class OpClassToServer:
 
     def list_pushes(self, host: str, key: str, repo: str, port: int = 2222) -> list[dict]:
         """List all push versions for a repo."""
-        conn = self._get_connection(host, key, port)
+        conn = self._connect_or_fail(host, key, port)
         try:
             exit_code, stdout, stderr = conn.exec_command(f"pushes {repo}")
         finally:
@@ -521,7 +615,7 @@ class OpClassToServer:
 
     def diff_versions(self, host: str, key: str, repo: str, from_ver: int, to_ver: int, port: int = 2222) -> dict | None:
         """Diff two push versions."""
-        conn = self._get_connection(host, key, port)
+        conn = self._connect_or_fail(host, key, port)
         try:
             exit_code, stdout, stderr = conn.exec_command(f"diff {repo} {from_ver} {to_ver}")
         finally:
@@ -613,3 +707,11 @@ def _format_size(size_bytes: int) -> str:
         return f"{size_bytes / (1024 * 1024):.1f} MB"
     else:
         return f"{size_bytes / (1024 * 1024 * 1024):.1f} GB"
+
+
+def _key_fingerprint(key: paramiko.PKey) -> str:
+    """Compute SHA-256 fingerprint of a host key."""
+    import base64
+    digest = hashlib.sha256(key.asbytes()).digest()
+    b64 = base64.b64encode(digest).decode().rstrip("=")
+    return f"SHA256:{b64}"
