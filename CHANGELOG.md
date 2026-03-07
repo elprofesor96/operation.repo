@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+### ✨ New Features
+- **SSH Push/Clone** - Native paramiko SSH transport to opsserver
+  - `op push -m "message"` - Push with optional message via SSH
+  - `op clone <repo> -v <version>` - Clone specific version from server
+  - `op server verify` - Interactive host key verification (like `ssh -T git@github.com`)
+  - `op server pushes <repo>` - View push history for a repo
+  - `op server diff <repo> <from> <to>` - Diff two push versions
+  - `op remote add --port/-p` - Configure SSH port
+
+### 🔒 Security
+- Replaced `paramiko.AutoAddPolicy()` with `RejectPolicy` + `~/.op/known_hosts`
+- Host key verification with interactive trust-on-first-use via `op server verify`
+
+### 🔧 Improvements
+- Migrated server communication from subprocess SSH/SCP to native paramiko
+- Removed `grip` dependency (README viewing handled server-side)
+
 ## [3.1.1] - 2026-03-03
 - delete old opsserver folder and its scripts, deprecated
 - delete ssh folder because that placeholder no longer needed

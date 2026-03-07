@@ -28,3 +28,4 @@ security: | $(REPORTS_FOLDER)
 # Ensure the reports folder exists
 $(REPORTS_FOLDER):
 	mkdir -p $(REPORTS_FOLDER)
+
