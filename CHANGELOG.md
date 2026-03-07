@@ -2,7 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
-## [3.1.2]
+
+
+## [3.2.0]
 ### ✨ New Features
 - **SSH Push/Clone** - Native paramiko SSH transport to opsserver
   - `op push -m "message"` - Push with optional message via SSH
