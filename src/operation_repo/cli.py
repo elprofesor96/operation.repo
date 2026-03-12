@@ -332,11 +332,13 @@ def remote_remove(
 # =============================================================================
 
 @server_app.command("list")
-def server_list() -> None:
+def server_list(
+    org: str | None = typer.Option(None, "--org", "-o", help="List organization repos"),
+) -> None:
     """List repos on opsserver."""
     config = ConfigHandler()
     host, key, port = config.read_server_config()
-    OpClassToServer().list_repos(host, key, port=port)
+    OpClassToServer().list_repos(host, key, port=port, org=org)
 
 
 @server_app.command("view")
@@ -382,14 +384,15 @@ def server_verify() -> None:
 @app.command("push")
 def push(
     message: str = typer.Option("", "--message", "-m", help="Push message"),
+    org: str | None = typer.Option(None, "--org", "-o", help="Push to organization repo"),
 ) -> None:
     """Push repo to opsserver."""
     config = ConfigHandler()
     host, key, port = config.read_server_config()
     if message:
-        OpClassToServer().push_repo_with_message(host, key, message, port=port)
+        OpClassToServer().push_repo_with_message(host, key, message, port=port, org=org)
     else:
-        OpClassToServer().push_repo(host, key, port=port)
+        OpClassToServer().push_repo(host, key, port=port, org=org)
 
 
 @app.command("clone")
