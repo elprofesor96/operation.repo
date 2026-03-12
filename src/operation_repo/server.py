@@ -7,6 +7,7 @@ Uses paramiko for native SSH transport. No subprocess, no SCP, no shell commands
 import hashlib
 import json
 import os
+import re
 import tarfile
 import tempfile
 from pathlib import Path
@@ -17,6 +18,15 @@ from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn
 from rich.table import Table
 
 console = Console()
+
+_ORG_NAME_RE = re.compile(r"^[a-z0-9][a-z0-9-]*[a-z0-9]$")
+
+
+def _validate_org_name(name: str) -> None:
+    """Validate an organization name. Raises SystemExit on invalid input."""
+    if len(name) < 2 or len(name) > 100 or not _ORG_NAME_RE.match(name):
+        console.print("[red]x[/red] Invalid org name (lowercase alphanumeric + hyphens, 2-100 chars)")
+        raise SystemExit(1)
 
 
 class UnknownHostKeyError(Exception):
@@ -349,12 +359,18 @@ class OpClassToServer:
         console.print(f"[green]ok[/green] Host key saved to {known_hosts_path}")
         return True
 
-    def push_repo(self, host: str, key: str, port: int = 2222) -> bool:
+    def push_repo(self, host: str, key: str, port: int = 2222, org: str | None = None) -> bool:
         """Push the current repo to opsserver via SSH."""
         pwd = Path.cwd()
         repo_name = pwd.name
 
-        console.print(f"\n[bold]Pushing '{repo_name}' to {host}:{port}...[/bold]\n")
+        if org:
+            _validate_org_name(org)
+            target = f"{org}/{repo_name}"
+        else:
+            target = repo_name
+
+        console.print(f"\n[bold]Pushing '{target}' to {host}:{port}...[/bold]\n")
 
         # Check this is an op repo
         if not (pwd / ".opignore").exists():
@@ -382,7 +398,7 @@ class OpClassToServer:
             conn = self._connect_or_fail(host, key, port)
             try:
                 exit_code, stdout, stderr = conn.exec_push(
-                    command=f"push {repo_name}",
+                    command=f"push {target}",
                     header=header,
                     archive_path=archive_path,
                 )
@@ -395,7 +411,8 @@ class OpClassToServer:
 
             # Parse and display result
             result = json.loads(stdout)
-            console.print(f"\n[bold green]Pushed '{result['repo']}' v{result['version']}[/bold green]")
+            display = f"{org}/{result['repo']}" if org else result['repo']
+            console.print(f"\n[bold green]Pushed '{display}' v{result['version']}[/bold green]")
             console.print(f"  Size: {_format_size(result['size'])} | Files: {result['files']}")
             console.print(f"  Checksum: {result.get('checksum', 'n/a')}")
             return True
@@ -404,12 +421,18 @@ class OpClassToServer:
             # Clean up temp archive
             os.unlink(archive_path)
 
-    def push_repo_with_message(self, host: str, key: str, message: str, port: int = 2222) -> bool:
+    def push_repo_with_message(self, host: str, key: str, message: str, port: int = 2222, org: str | None = None) -> bool:
         """Push with a commit message."""
         pwd = Path.cwd()
         repo_name = pwd.name
 
-        console.print(f"\n[bold]Pushing '{repo_name}' to {host}:{port}...[/bold]\n")
+        if org:
+            _validate_org_name(org)
+            target = f"{org}/{repo_name}"
+        else:
+            target = repo_name
+
+        console.print(f"\n[bold]Pushing '{target}' to {host}:{port}...[/bold]\n")
 
         if not (pwd / ".opignore").exists():
             console.print("[red]x[/red] Not an op repo (run 'op init' first)")
@@ -433,7 +456,7 @@ class OpClassToServer:
             conn = self._connect_or_fail(host, key, port)
             try:
                 exit_code, stdout, stderr = conn.exec_push(
-                    command=f"push {repo_name}",
+                    command=f"push {target}",
                     header=header,
                     archive_path=archive_path,
                 )
@@ -445,7 +468,8 @@ class OpClassToServer:
                 return False
 
             result = json.loads(stdout)
-            console.print(f"\n[bold green]Pushed '{result['repo']}' v{result['version']}[/bold green]")
+            display = f"{org}/{result['repo']}" if org else result['repo']
+            console.print(f"\n[bold green]Pushed '{display}' v{result['version']}[/bold green]")
             console.print(f"  Size: {_format_size(result['size'])} | Files: {result['files']}")
             console.print(f"  Checksum: {result.get('checksum', 'n/a')}")
             return True
@@ -457,9 +481,11 @@ class OpClassToServer:
         """Clone a repo from opsserver via SSH."""
         console.print(f"\n[bold]Cloning '{repo}' from {host}:{port}...[/bold]\n")
 
-        local_path = Path.cwd() / repo
+        # For org repos (orgname/reponame), use just the repo name as local dir
+        local_name = repo.split("/")[-1] if "/" in repo else repo
+        local_path = Path.cwd() / local_name
         if local_path.exists():
-            console.print(f"[red]x[/red] Directory '{repo}' already exists")
+            console.print(f"[red]x[/red] Directory '{local_name}' already exists")
             return False
 
         # Build clone command
@@ -507,13 +533,19 @@ class OpClassToServer:
         finally:
             os.unlink(tmp_path)
 
-    def list_repos(self, host: str, key: str, port: int = 2222) -> list[dict]:
-        """List all repos on opsserver."""
-        console.print(f"\n[bold]Listing repos from {host}:{port}...[/bold]\n")
+    def list_repos(self, host: str, key: str, port: int = 2222, org: str | None = None) -> list[dict]:
+        """List all repos on opsserver (or in an organization)."""
+        if org:
+            _validate_org_name(org)
+            console.print(f"\n[bold]Listing repos for org '{org}' from {host}:{port}...[/bold]\n")
+            cmd = f"list {org}"
+        else:
+            console.print(f"\n[bold]Listing repos from {host}:{port}...[/bold]\n")
+            cmd = "list"
 
         conn = self._connect_or_fail(host, key, port)
         try:
-            exit_code, stdout, stderr = conn.exec_command("list")
+            exit_code, stdout, stderr = conn.exec_command(cmd)
         finally:
             conn.close()
 
@@ -524,10 +556,12 @@ class OpClassToServer:
         repos = json.loads(stdout)
 
         if not repos:
-            console.print("[yellow]No repos found on server[/yellow]")
+            label = f"in org '{org}'" if org else "on server"
+            console.print(f"[yellow]No repos found {label}[/yellow]")
             return []
 
-        table = Table(title="Repositories on opsserver")
+        title = f"Repositories in {org}" if org else "Repositories on opsserver"
+        table = Table(title=title)
         table.add_column("#", style="cyan", justify="right")
         table.add_column("Name", style="green")
         table.add_column("Description", style="dim")
