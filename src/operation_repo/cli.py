@@ -76,7 +76,7 @@ ssh_key = /path/to/your/key
 # files to create (name = on)
 
 [SCRIPTS]
-# deployables from ~/.op/opscripts/ (name = on)
+# scripts from ~/.op/opscripts/ (name = on)
 """
     try:
         op_dir.mkdir(parents=True, exist_ok=True)
