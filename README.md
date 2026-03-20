@@ -105,11 +105,22 @@ op log
 | `op template create` | Create template interactively |
 | `op template delete web` | Delete a template |
 
+### Remote & Org
+
+| Command | Description |
+|---------|-------------|
+| `op remote` | Show remote and org config |
+| `op remote add -s <host> -k <key>` | Add or update remote server |
+| `op remote remove` | Reset remote server config |
+| `op remote set-org <org>` | Set default org for this repo |
+| `op remote remove-org` | Remove org (pushes go to private) |
+
 ### Server
 
 | Command | Description |
 |---------|-------------|
-| `op push` | Push repo to opsserver |
+| `op push` | Push repo to opsserver (uses saved org) |
+| `op push --org <org>` | Push to org and save it as default |
 | `op clone <repo>` | Clone repo from opsserver |
 | `op server list` | List repos on opsserver |
 | `op server view <repo>` | View README from opsserver |
@@ -185,6 +196,7 @@ my-operation/
 ├── .op/
 │   ├── commits/       # Commit snapshots
 │   ├── exports/       # Exported archives
+│   ├── config         # Repo-level config (org, etc.)
 │   ├── notes.json     # Your notes
 │   └── HEAD           # Current commit pointer
 ├── .opignore
@@ -219,8 +231,12 @@ op log
 # Export for report
 op export -f zip
 
-# Push to your server
+# Push to your server (private)
 op push
+
+# Or set an org and push there
+op remote set-org acme
+op push                  # goes to acme automatically
 ```
 
 ## Development
