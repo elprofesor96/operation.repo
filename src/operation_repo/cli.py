@@ -301,6 +301,17 @@ def remote_default(
     # Default behavior: show config (always, -v is for compat)
     ConfigHandler().show_server_config()
 
+    # Show repo-level org if in an op repo
+    op = OpClass()
+    if op._is_op_repo():
+        org = op.get_org()
+        if org:
+            console.print(f"\n[cyan]Repo org:[/cyan] [green]{org}[/green]")
+            console.print("[dim]  Pushes will go to this org[/dim]")
+        else:
+            console.print("\n[cyan]Repo org:[/cyan] [dim]none (pushes go to private ops)[/dim]")
+            console.print("[dim]  Set with: op remote set-org <org>[/dim]")
+
 
 @remote_app.command("add")
 def remote_add(
@@ -325,6 +336,28 @@ def remote_remove(
     if not force and not typer.confirm("Reset remote configuration?"):
         raise typer.Exit()
     ConfigHandler().remove_server_config()
+
+
+@remote_app.command("set-org")
+def remote_set_org(
+    org: str = typer.Argument(..., help="Organization name"),
+) -> None:
+    """Set default org for this repo. Pushes will go to this org."""
+    op = OpClass()
+    if not op._is_op_repo():
+        console.print("[red]x[/red] Not an op repo (run 'op init' first)")
+        raise typer.Exit(1)
+    op.set_org(org)
+
+
+@remote_app.command("remove-org")
+def remote_remove_org() -> None:
+    """Remove org config. Pushes will go to private ops."""
+    op = OpClass()
+    if not op._is_op_repo():
+        console.print("[red]x[/red] Not an op repo (run 'op init' first)")
+        raise typer.Exit(1)
+    op.remove_org()
 
 
 # =============================================================================
@@ -386,7 +419,17 @@ def push(
     message: str = typer.Option("", "--message", "-m", help="Push message"),
     org: str | None = typer.Option(None, "--org", "-o", help="Push to organization repo"),
 ) -> None:
-    """Push repo to opsserver."""
+    """Push repo to opsserver. Uses saved org if configured."""
+    op = OpClass()
+
+    # Resolve org: flag > saved config
+    if org:
+        # Save org for future pushes
+        if op._is_op_repo():
+            op.set_org(org)
+    else:
+        org = op.get_org()
+
     config = ConfigHandler()
     host, key, port = config.read_server_config()
     if message:

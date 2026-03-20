@@ -2,6 +2,7 @@
 Core operations for op repo - init, export, remove, status.
 """
 
+import configparser
 import hashlib
 import shutil
 import subprocess
@@ -77,6 +78,53 @@ class OpClass:
         """Calculate MD5 hash of a file."""
         with open(filepath, "rb") as f:
             return hashlib.md5(f.read()).hexdigest()
+
+    def _get_local_config_path(self) -> Path:
+        """Return path to local .op/config file."""
+        return self.pwd / ".op" / "config"
+
+    def _read_local_config(self) -> configparser.ConfigParser:
+        """Read the local .op/config file."""
+        config = configparser.ConfigParser()
+        config_path = self._get_local_config_path()
+        if config_path.exists():
+            config.read(config_path)
+        return config
+
+    def _write_local_config(self, config: configparser.ConfigParser) -> None:
+        """Write the local .op/config file."""
+        config_path = self._get_local_config_path()
+        with open(config_path, "w") as f:
+            config.write(f)
+
+    def get_org(self) -> str | None:
+        """Get the configured org for this repo."""
+        config = self._read_local_config()
+        if config.has_section("remote") and config.has_option("remote", "org"):
+            return config.get("remote", "org")
+        return None
+
+    def set_org(self, org: str) -> None:
+        """Set the default org for this repo."""
+        config = self._read_local_config()
+        if not config.has_section("remote"):
+            config.add_section("remote")
+        config.set("remote", "org", org)
+        self._write_local_config(config)
+        console.print(f"[green]ok[/green] Org set to: {org}")
+
+    def remove_org(self) -> None:
+        """Remove the configured org for this repo."""
+        config = self._read_local_config()
+        if config.has_section("remote") and config.has_option("remote", "org"):
+            config.remove_option("remote", "org")
+            # Remove empty section
+            if not config.options("remote"):
+                config.remove_section("remote")
+            self._write_local_config(config)
+            console.print("[green]ok[/green] Org removed, push will go to private ops")
+        else:
+            console.print("[yellow]![/yellow] No org configured for this repo")
 
     def create_opfolder(self, total: int = 5) -> None:
         """Create the .op folder."""
@@ -316,6 +364,13 @@ Operation initialized on {datetime.now().strftime("%Y-%m-%d %H:%M")}.
 
         if head_commit:
             table.add_row("🎯 HEAD", head_commit)
+
+        # Show org if configured
+        org = self.get_org()
+        if org:
+            table.add_row("🏢 Org", f"[green]{org}[/green]")
+        else:
+            table.add_row("🏢 Org", "[dim]private[/dim]")
 
         console.print(table)
 
