@@ -60,7 +60,7 @@ def ensure_op_config() -> None:
     home_folder = config_handler.get_home_folder()
     op_dir = Path(home_folder) / ".op"
     op_conf = op_dir / "op.conf"
-    opsdb_dir = op_dir / "scripts"
+    opsdb_dir = op_dir / "opscripts"
 
     if op_dir.exists():
         return
@@ -76,7 +76,7 @@ ssh_key = /path/to/your/key
 # files to create (name = on)
 
 [SCRIPTS]
-# deployables from ~/.op/scripts/ (name = on)
+# deployables from ~/.op/opscripts/ (name = on)
 """
     try:
         op_dir.mkdir(parents=True, exist_ok=True)

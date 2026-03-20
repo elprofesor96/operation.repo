@@ -134,12 +134,12 @@ Operation initialized on {datetime.now().strftime("%Y-%m-%d %H:%M")}.
         console.print(f"[green]✓[/green] [3/{total}] Created {readme_path}")
 
     def create_opsdb(self, total: int = 5) -> None:
-        """Create opsdb/scripts folder with index.html."""
-        opsdb_path = self.pwd / "scripts"
+        """Create opscripts folder with index.html."""
+        opsdb_path = self.pwd / "opscripts"
         index_path = opsdb_path / "index.html"
 
         if opsdb_path.exists():
-            console.print("[yellow]![/yellow] opsdb/scripts already exists, skipping")
+            console.print("[yellow]![/yellow] opscripts already exists, skipping")
             return
 
         opsdb_path.mkdir()
@@ -152,7 +152,7 @@ Operation initialized on {datetime.now().strftime("%Y-%m-%d %H:%M")}.
         """Create default op repo structure."""
         self.create_opfolder()
         self.create_opignore()
-        self._write_to_opignore("scripts")
+        self._write_to_opignore("opscripts")
         self.create_readme()
         self.create_opsdb()
 
