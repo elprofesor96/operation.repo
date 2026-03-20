@@ -309,7 +309,7 @@ def remote_default(
             console.print(f"\n[cyan]Repo org:[/cyan] [green]{org}[/green]")
             console.print("[dim]  Pushes will go to this org[/dim]")
         else:
-            console.print(f"\n[cyan]Repo org:[/cyan] [dim]none (pushes go to private ops)[/dim]")
+            console.print("\n[cyan]Repo org:[/cyan] [dim]none (pushes go to private ops)[/dim]")
             console.print("[dim]  Set with: op remote set-org <org>[/dim]")
 
 
