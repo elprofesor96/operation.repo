@@ -152,7 +152,7 @@ Operation initialized on {datetime.now().strftime("%Y-%m-%d %H:%M")}.
         """Create default op repo structure."""
         self.create_opfolder()
         self.create_opignore()
-        self._write_to_opignore(".op")
+        self._write_to_opignore("scripts")
         self.create_readme()
         self.create_opsdb()
 
