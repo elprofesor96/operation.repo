@@ -135,8 +135,8 @@ loot = on
 todo.txt = on
 credentials.txt = on
 
-[DB]
-# Scripts to copy from ~/.op/opsdb/
+[SCRIPTS]
+# scripts from ~/.op/opscripts/
 linpeas.sh = on
 ```
 
@@ -154,7 +154,7 @@ screenshots = on
 urls.txt = on
 params.txt = on
 
-[WEB_DEPLOYABLE]
+[WEB_SCRIPTS]
 dirbuster-list.txt = on
 ```
 
@@ -189,7 +189,7 @@ my-operation/
 │   └── HEAD           # Current commit pointer
 ├── .opignore
 ├── README.md
-└── opsdb/
+└── opscripts/
 ```
 
 ## Workflow Example

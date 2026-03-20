@@ -27,7 +27,7 @@ class ConfigHandler:
         if self.config_path.exists():
             self.config.read(self.config_path)
 
-        self.opsdb_folder_path = self.home_folder / ".op" / "scripts"
+        self.opsdb_folder_path = self.home_folder / ".op" / "opscripts"
         self.sections = self.config.sections()
 
         self.custom_template_sections: list[str] = []
@@ -42,7 +42,7 @@ class ConfigHandler:
         return self.opsdb_folder_path
 
     def get_deployable_folder_path(self) -> Path:
-        """Return the deployable folder path (alias for scripts folder)."""
+        """Return the deployable folder path (alias for opscripts folder)."""
         return self.opsdb_folder_path
 
     def read_folder_structure(self) -> list[str]:

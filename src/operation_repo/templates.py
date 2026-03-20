@@ -75,7 +75,7 @@ class TemplateManager:
 
         # Default template
         console.print("\n[bold cyan]default[/bold cyan] (built-in)")
-        console.print("  Creates: .op/, .opignore, README.md, scripts/")
+        console.print("  Creates: .op/, .opignore, README.md, opscripts/")
         console.print("  Plus any items in [FOLDER], [FILE], [SCRIPTS] sections")
 
         if not templates:
@@ -106,8 +106,8 @@ class TemplateManager:
             console.print("  • .op/")
             console.print("  • .opignore")
             console.print("  • README.md")
-            console.print("  • scripts/")
-            console.print("  • scripts/index.html")
+            console.print("  • opscripts/")
+            console.print("  • opscripts/index.html")
 
             # Show default config items
             if "FOLDER" in self.config.sections():
@@ -180,7 +180,7 @@ class TemplateManager:
         files = [f.strip() for f in files_input.split(",") if f.strip()]
 
         # Get scripts
-        console.print("\n[bold]Scripts to copy[/bold] (from ~/.op/scripts/, comma-separated)")
+        console.print("\n[bold]Scripts to copy[/bold] (from ~/.op/opscripts/, comma-separated)")
         deploy_input = Prompt.ask("Scripts", default="")
         deployables = [d.strip() for d in deploy_input.split(",") if d.strip()]
 
