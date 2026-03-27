@@ -394,14 +394,29 @@ Operation initialized on {datetime.now().strftime("%Y-%m-%d %H:%M")}.
                     head_meta = json.load(f)
                 last_snapshot = head_meta.get("snapshot", {})
 
-                changes = len(set(current.keys()) ^ set(last_snapshot.keys()))
-                for path in current:
-                    if path in last_snapshot and current[path] != last_snapshot[path]:
-                        changes += 1
+                added = [p for p in current if p not in last_snapshot]
+                modified = [
+                    p for p in current
+                    if p in last_snapshot and current[p] != last_snapshot[p]
+                ]
+                deleted = [p for p in last_snapshot if p not in current]
 
-                if changes > 0:
-                    console.print(f"\n[yellow]⚠ {changes} uncommitted changes[/yellow]")
-                    console.print("  Use: op diff")
+                if added or modified or deleted:
+                    console.print("\n[bold yellow]Uncommitted changes:[/bold yellow]")
+                    for p in added:
+                        console.print(f"  [green]+[/green] {p}")
+                    for p in modified:
+                        console.print(f"  [yellow]~[/yellow] {p}")
+                    for p in deleted:
+                        console.print(f"  [red]-[/red] {p}")
+                    total = len(added) + len(modified) + len(deleted)
+                    console.print(
+                        f"\n  [dim]{len(added)} new, {len(modified)} modified, "
+                        f"{len(deleted)} deleted ({total} total)[/dim]"
+                    )
+                    console.print("  Use: [cyan]op commit -m \"message\"[/cyan]")
+                else:
+                    console.print("\n[green]✓ No uncommitted changes[/green]")
 
     def export(
         self,
