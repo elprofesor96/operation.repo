@@ -10,6 +10,7 @@ import os
 import re
 import tarfile
 import tempfile
+from datetime import datetime
 from pathlib import Path
 
 import paramiko
@@ -415,6 +416,12 @@ class OpClassToServer:
             console.print(f"\n[bold green]Pushed '{display}' v{result['version']}[/bold green]")
             console.print(f"  Size: {_format_size(result['size'])} | Files: {result['files']}")
             console.print(f"  Checksum: {result.get('checksum', 'n/a')}")
+
+            try:
+                self._save_push_snapshot(result["version"])
+            except (OSError, KeyError):
+                console.print("[yellow]![/yellow] Could not save push snapshot")
+
             return True
 
         finally:
@@ -472,6 +479,12 @@ class OpClassToServer:
             console.print(f"\n[bold green]Pushed '{display}' v{result['version']}[/bold green]")
             console.print(f"  Size: {_format_size(result['size'])} | Files: {result['files']}")
             console.print(f"  Checksum: {result.get('checksum', 'n/a')}")
+
+            try:
+                self._save_push_snapshot(result["version"])
+            except (OSError, KeyError):
+                console.print("[yellow]![/yellow] Could not save push snapshot")
+
             return True
 
         finally:
@@ -716,6 +729,24 @@ class OpClassToServer:
                     break
                 h.update(chunk)
         return h.hexdigest()
+
+    @staticmethod
+    def _save_push_snapshot(version: int) -> None:
+        """Save a snapshot of tracked files after a successful push."""
+        from operation_repo.commits import CommitManager
+
+        cm = CommitManager()
+        snapshot = cm._get_file_snapshot()
+
+        push_data = {
+            "timestamp": datetime.now().isoformat(),
+            "version": version,
+            "snapshot": snapshot,
+        }
+
+        push_snapshot_path = Path.cwd() / ".op" / "push-snapshot.json"
+        with open(push_snapshot_path, "w") as f:
+            json.dump(push_data, f, indent=2)
 
     @staticmethod
     def _print_error(stderr: bytes) -> None:
