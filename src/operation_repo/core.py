@@ -438,12 +438,13 @@ Operation initialized on {datetime.now().strftime("%Y-%m-%d %H:%M")}.
             cm = CommitManager()
             current = cm._get_file_snapshot()
 
-            p_added = [p for p in current if p not in push_snapshot]
+            skip = {".op/push-snapshot.json"}
+            p_added = [p for p in current if p not in push_snapshot and p not in skip]
             p_modified = [
                 p for p in current
-                if p in push_snapshot and current[p] != push_snapshot[p]
+                if p in push_snapshot and current[p] != push_snapshot[p] and p not in skip
             ]
-            p_deleted = [p for p in push_snapshot if p not in current]
+            p_deleted = [p for p in push_snapshot if p not in current and p not in skip]
 
             if p_added or p_modified or p_deleted:
                 console.print(
