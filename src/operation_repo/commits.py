@@ -302,6 +302,8 @@ class CommitManager:
 
         # Find added and modified files
         for path, hash_val in current_snapshot.items():
+            if path.startswith(".op/"):
+                continue
             if path not in commit_snapshot:
                 added.append(path)
             elif commit_snapshot[path] != hash_val:
@@ -309,6 +311,8 @@ class CommitManager:
 
         # Find deleted files
         for path in commit_snapshot:
+            if path.startswith(".op/"):
+                continue
             if path not in current_snapshot:
                 deleted.append(path)
 
