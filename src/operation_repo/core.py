@@ -351,9 +351,6 @@ Operation initialized on {datetime.now().strftime("%Y-%m-%d %H:%M")}.
         table.add_row("🔖 Commits", str(len(commits)))
         table.add_row("📝 Notes", str(notes_count))
 
-        if head_commit:
-            table.add_row("🎯 HEAD", head_commit)
-
         # Show org if configured
         org = self.get_org()
         if org:
