@@ -201,6 +201,7 @@ Operation initialized on {datetime.now().strftime("%Y-%m-%d %H:%M")}.
         self.create_opfolder()
         self.create_opignore()
         self._write_to_opignore("opscripts")
+        self._write_to_opignore(".op/exports")
         self.create_readme()
         self.create_opsdb()
 
