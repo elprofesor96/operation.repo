@@ -391,12 +391,12 @@ Operation initialized on {datetime.now().strftime("%Y-%m-%d %H:%M")}.
                     head_meta = json.load(f)
                 last_snapshot = head_meta.get("snapshot", {})
 
-                added = [p for p in current if p not in last_snapshot]
+                added = [p for p in current if p not in last_snapshot and not p.startswith(".op/")]
                 modified = [
                     p for p in current
-                    if p in last_snapshot and current[p] != last_snapshot[p]
+                    if p in last_snapshot and current[p] != last_snapshot[p] and not p.startswith(".op/")
                 ]
-                deleted = [p for p in last_snapshot if p not in current]
+                deleted = [p for p in last_snapshot if p not in current and not p.startswith(".op/")]
 
                 if added or modified or deleted:
                     console.print("\n[bold yellow]Uncommitted changes:[/bold yellow]")
@@ -427,13 +427,12 @@ Operation initialized on {datetime.now().strftime("%Y-%m-%d %H:%M")}.
             cm = CommitManager()
             current = cm._get_file_snapshot()
 
-            skip = {".op/push-snapshot.json"}
-            p_added = [p for p in current if p not in push_snapshot and p not in skip]
+            p_added = [p for p in current if p not in push_snapshot and not p.startswith(".op/")]
             p_modified = [
                 p for p in current
-                if p in push_snapshot and current[p] != push_snapshot[p] and p not in skip
+                if p in push_snapshot and current[p] != push_snapshot[p] and not p.startswith(".op/")
             ]
-            p_deleted = [p for p in push_snapshot if p not in current and p not in skip]
+            p_deleted = [p for p in push_snapshot if p not in current and not p.startswith(".op/")]
 
             if p_added or p_modified or p_deleted:
                 console.print(
