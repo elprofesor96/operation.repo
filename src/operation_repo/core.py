@@ -318,11 +318,6 @@ Operation initialized on {datetime.now().strftime("%Y-%m-%d %H:%M")}.
             console.print("[red]✗[/red] Not an op repo (run 'op init' first)")
             return
 
-        # Count files
-        ignored_paths = self._get_ignored_paths()
-        all_files = list(self.pwd.rglob("*"))
-        tracked_files = [f for f in all_files if f.is_file() and f not in ignored_paths]
-
         # Get exports
         op_folder = self.pwd / ".op"
         exports_dir = op_folder / "exports"
@@ -344,10 +339,6 @@ Operation initialized on {datetime.now().strftime("%Y-%m-%d %H:%M")}.
         head_file = op_folder / "HEAD"
         head_commit = head_file.read_text().strip() if head_file.exists() else None
 
-        # Calculate total size
-        total_size = sum(f.stat().st_size for f in tracked_files if f.exists())
-        size_mb = total_size / (1024 * 1024)
-
         # Create status display
         console.print(Panel(f"[bold]{self.pwd.name}[/bold]", subtitle="Op Repo Status"))
 
@@ -356,8 +347,6 @@ Operation initialized on {datetime.now().strftime("%Y-%m-%d %H:%M")}.
         table.add_column("Value", style="white")
 
         table.add_row("📁 Location", str(self.pwd))
-        table.add_row("📄 Tracked files", str(len(tracked_files)))
-        table.add_row("💾 Total size", f"{size_mb:.2f} MB")
         table.add_row("📦 Exports", str(len(exports)))
         table.add_row("🔖 Commits", str(len(commits)))
         table.add_row("📝 Notes", str(notes_count))
