@@ -372,6 +372,14 @@ Operation initialized on {datetime.now().strftime("%Y-%m-%d %H:%M")}.
         else:
             table.add_row("🏢 Org", "[dim]private[/dim]")
 
+        # Show last push version
+        push_snapshot_path = op_folder / "push-snapshot.json"
+        if push_snapshot_path.exists():
+            import json
+            with open(push_snapshot_path) as f:
+                push_data = json.load(f)
+            table.add_row("🚀 Last push", f"v{push_data.get('version', '?')}")
+
         console.print(table)
 
         # Show recent exports
@@ -417,6 +425,46 @@ Operation initialized on {datetime.now().strftime("%Y-%m-%d %H:%M")}.
                     console.print("  Use: [cyan]op commit -m \"message\"[/cyan]")
                 else:
                     console.print("\n[green]✓ No uncommitted changes[/green]")
+
+        # Check for unpushed changes
+        if push_snapshot_path.exists():
+            import json
+            with open(push_snapshot_path) as f:
+                push_data = json.load(f)
+            push_snapshot = push_data.get("snapshot", {})
+            push_version = push_data.get("version", "?")
+
+            from operation_repo.commits import CommitManager
+            cm = CommitManager()
+            current = cm._get_file_snapshot()
+
+            p_added = [p for p in current if p not in push_snapshot]
+            p_modified = [
+                p for p in current
+                if p in push_snapshot and current[p] != push_snapshot[p]
+            ]
+            p_deleted = [p for p in push_snapshot if p not in current]
+
+            if p_added or p_modified or p_deleted:
+                console.print(
+                    f"\n[bold magenta]Unpushed changes (vs push v{push_version}):[/bold magenta]"
+                )
+                for p in p_added:
+                    console.print(f"  [green]+[/green] {p}")
+                for p in p_modified:
+                    console.print(f"  [yellow]~[/yellow] {p}")
+                for p in p_deleted:
+                    console.print(f"  [red]-[/red] {p}")
+                p_total = len(p_added) + len(p_modified) + len(p_deleted)
+                console.print(
+                    f"\n  [dim]{len(p_added)} new, {len(p_modified)} modified, "
+                    f"{len(p_deleted)} deleted ({p_total} total)[/dim]"
+                )
+                console.print("  Use: [cyan]op push[/cyan]")
+            else:
+                console.print(
+                    f"\n[green]✓ Up to date with server (v{push_version})[/green]"
+                )
 
     def export(
         self,
