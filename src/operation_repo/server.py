@@ -365,6 +365,11 @@ class OpClassToServer:
         pwd = Path.cwd()
         repo_name = pwd.name
 
+        # Check this is an op repo first
+        if not (pwd / ".opignore").exists():
+            console.print("[red]x[/red] Not an op repo (run 'op init' first)")
+            return False
+
         if org:
             _validate_org_name(org)
             target = f"{org}/{repo_name}"
@@ -372,11 +377,6 @@ class OpClassToServer:
             target = repo_name
 
         console.print(f"\n[bold]Pushing '{target}' to {host}:{port}...[/bold]\n")
-
-        # Check this is an op repo
-        if not (pwd / ".opignore").exists():
-            console.print("[red]x[/red] Not an op repo (run 'op init' first)")
-            return False
 
         # Export to tar.gz in a temp file
         console.print("[cyan]Creating archive...[/cyan]")
@@ -438,6 +438,11 @@ class OpClassToServer:
         pwd = Path.cwd()
         repo_name = pwd.name
 
+        # Check this is an op repo first
+        if not (pwd / ".opignore").exists():
+            console.print("[red]x[/red] Not an op repo (run 'op init' first)")
+            return False
+
         if org:
             _validate_org_name(org)
             target = f"{org}/{repo_name}"
@@ -445,10 +450,6 @@ class OpClassToServer:
             target = repo_name
 
         console.print(f"\n[bold]Pushing '{target}' to {host}:{port}...[/bold]\n")
-
-        if not (pwd / ".opignore").exists():
-            console.print("[red]x[/red] Not an op repo (run 'op init' first)")
-            return False
 
         console.print("[cyan]Creating archive...[/cyan]")
         archive_path = self._create_archive(pwd)
