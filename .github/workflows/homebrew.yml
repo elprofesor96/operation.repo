@@ -1,0 +1,75 @@
+name: Update Homebrew Formula
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  update-formula:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Extract version from tag
+        id: version
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          version="${tag#v}"
+          if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Invalid version format: $version"
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+      - name: Download source tarball and compute SHA256
+        id: sha
+        env:
+          TARBALL_URL: "https://github.com/${{ github.repository }}/archive/refs/tags/${{ steps.version.outputs.tag }}.tar.gz"
+        run: |
+          curl -fsSL -o source.tar.gz "$TARBALL_URL"
+          sha256=$(sha256sum source.tar.gz | cut -d' ' -f1)
+          echo "sha256=$sha256" >> "$GITHUB_OUTPUT"
+          echo "url=$TARBALL_URL" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout homebrew-repos
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: ${{ github.repository_owner }}/homebrew-repos
+          token: ${{ secrets.HOMEBREW_REPOS_TOKEN }}
+
+      - name: Detect formula file
+        id: formula
+        run: |
+          repo_name=$(echo "${{ github.event.repository.name }}" | tr '[:upper:]' '[:lower:]')
+          formula_file="${repo_name}.rb"
+          if [[ ! -f "$formula_file" ]]; then
+            echo "::error::Formula not found: $formula_file"
+            exit 1
+          fi
+          echo "file=$formula_file" >> "$GITHUB_OUTPUT"
+
+      - name: Update formula
+        env:
+          NEW_URL: ${{ steps.sha.outputs.url }}
+          NEW_SHA: ${{ steps.sha.outputs.sha256 }}
+          FORMULA: ${{ steps.formula.outputs.file }}
+        run: |
+          sed -i "s|^\(  url \)\".*\"|\1\"${NEW_URL}\"|" "$FORMULA"
+          sed -i "0,/^\(  sha256 \)\".*\"/{s|^\(  sha256 \)\".*\"|\1\"${NEW_SHA}\"|}" "$FORMULA"
+
+      - name: Commit and push
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          FORMULA: ${{ steps.formula.outputs.file }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$FORMULA"
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "update ${FORMULA%.rb} to v${VERSION}"
+          git push
