@@ -19,6 +19,7 @@ from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn
 from rich.table import Table
 
 console = Console()
+_quiet_console = Console(quiet=True)
 
 _ORG_NAME_RE = re.compile(r"^[a-z0-9][a-z0-9-]*[a-z0-9]$")
 
@@ -131,7 +132,7 @@ class SSHConnection:
 
         return exit_code, b"".join(stdout_chunks), b"".join(stderr_chunks)
 
-    def exec_push(self, command: str, header: dict, archive_path: str) -> tuple[int, bytes, bytes]:
+    def exec_push(self, command: str, header: dict, archive_path: str, progress_console: Console | None = None) -> tuple[int, bytes, bytes]:
         """Execute a push command: send JSON header line + raw archive bytes on stdin."""
         client = self.connect()
         transport = client.get_transport()
@@ -153,7 +154,7 @@ class SSHConnection:
             TextColumn("[progress.description]{task.description}"),
             BarColumn(),
             TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
-            console=console,
+            console=progress_console or console,
         ) as progress:
             task = progress.add_task("Uploading...", total=file_size)
 
@@ -376,11 +377,9 @@ class OpClassToServer:
         else:
             target = repo_name
 
-        console.print(f"\n[bold]Pushing '{target}' to {host}:{port}...[/bold]\n")
-
         # Export to tar.gz in a temp file
-        console.print("[cyan]Creating archive...[/cyan]")
-        archive_path = self._create_archive(pwd)
+        with console.status(f"[bold]Pushing '{target}' to {host}:{port}...[/bold]"):
+            archive_path = self._create_archive(pwd)
         if archive_path is None:
             return False
 
@@ -407,6 +406,7 @@ class OpClassToServer:
                     command=f"push {target}",
                     header=header,
                     archive_path=archive_path,
+                    progress_console=_quiet_console,
                 )
             finally:
                 conn.close()
@@ -449,10 +449,9 @@ class OpClassToServer:
         else:
             target = repo_name
 
-        console.print(f"\n[bold]Pushing '{target}' to {host}:{port}...[/bold]\n")
-
-        console.print("[cyan]Creating archive...[/cyan]")
-        archive_path = self._create_archive(pwd)
+        # Export to tar.gz in a temp file
+        with console.status(f"[bold]Pushing '{target}' to {host}:{port}...[/bold]"):
+            archive_path = self._create_archive(pwd)
         if archive_path is None:
             return False
 
@@ -476,6 +475,7 @@ class OpClassToServer:
                     command=f"push {target}",
                     header=header,
                     archive_path=archive_path,
+                    progress_console=_quiet_console,
                 )
             finally:
                 conn.close()
