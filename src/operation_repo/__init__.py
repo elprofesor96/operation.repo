@@ -4,7 +4,7 @@ Operation Repo - A Git-like CLI tool for organizing operations.
 Stay organized during pentests, HTB, and dev work.
 """
 
-__version__ = "3.10.0"
+__version__ = "3.10.1"
 __author__ = "elprofesor96"
 
 from operation_repo.commits import CommitManager
