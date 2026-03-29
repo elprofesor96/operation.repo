@@ -420,7 +420,8 @@ class OpClassToServer:
             display = f"{org}/{result['repo']}" if org else result['repo']
             console.print(f"\n[bold green]Pushed '{display}' v{result['version']}[/bold green]")
             console.print(f"  Size: {_format_size(result['size'])} | Files: {result['files']}")
-            console.print(f"  Checksum: {result.get('checksum', 'n/a')}")
+            checksum = result.get("checksum", "n/a")
+            console.print(f"  Checksum: {checksum}", highlight=False)
 
             try:
                 self._save_push_snapshot(result["version"])
@@ -488,7 +489,8 @@ class OpClassToServer:
             display = f"{org}/{result['repo']}" if org else result['repo']
             console.print(f"\n[bold green]Pushed '{display}' v{result['version']}[/bold green]")
             console.print(f"  Size: {_format_size(result['size'])} | Files: {result['files']}")
-            console.print(f"  Checksum: {result.get('checksum', 'n/a')}")
+            checksum = result.get("checksum", "n/a")
+            console.print(f"  Checksum: {checksum}", highlight=False)
 
             try:
                 self._save_push_snapshot(result["version"])
