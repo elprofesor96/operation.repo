@@ -389,12 +389,17 @@ class OpClassToServer:
             file_size = os.path.getsize(archive_path)
             checksum = self._compute_checksum(archive_path)
 
+            # First push from this project if no snapshot exists yet
+            is_first_push = not (pwd / ".op" / "push-snapshot.json").exists()
+
             # Build push header
-            header = {
+            header: dict = {
                 "size": file_size,
                 "checksum": f"sha256:{checksum}",
                 "message": "",
             }
+            if is_first_push:
+                header["expect_new"] = True
 
             conn = self._connect_or_fail(host, key, port)
             try:
@@ -454,11 +459,15 @@ class OpClassToServer:
             file_size = os.path.getsize(archive_path)
             checksum = self._compute_checksum(archive_path)
 
-            header = {
+            is_first_push = not (pwd / ".op" / "push-snapshot.json").exists()
+
+            header: dict = {
                 "size": file_size,
                 "checksum": f"sha256:{checksum}",
                 "message": message,
             }
+            if is_first_push:
+                header["expect_new"] = True
 
             conn = self._connect_or_fail(host, key, port)
             try:
