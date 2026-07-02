@@ -376,14 +376,20 @@ Operation initialized on {datetime.now().strftime("%Y-%m-%d %H:%M")}.
                 size_mb = export.stat().st_size / (1024 * 1024)
                 console.print(f"  • {export.name} ({size_mb:.2f} MB)")
 
-        # Check for uncommitted changes
+        # Change tracking — commit and push are independent workflows.
+        # Show each section only when that workflow is actually in use, so a
+        # push-only user isn't nagged about commits (and a commit-only user
+        # isn't nagged about pushes).
         from operation_repo.commits import CommitManager
         cm = CommitManager()
         current = cm._get_file_snapshot()
 
-        # Get last commit snapshot (empty if no commits yet)
-        last_snapshot: dict[str, str] = {}
-        if commits and head_commit:
+        has_commits = bool(commits and head_commit)
+        has_pushed = push_snapshot_path.exists()
+
+        # Uncommitted changes — only relevant if you're using local commits.
+        if has_commits:
+            last_snapshot: dict[str, str] = {}
             head_meta_file = commits_dir / f"{head_commit}.json"
             if head_meta_file.exists():
                 import json
@@ -391,41 +397,37 @@ Operation initialized on {datetime.now().strftime("%Y-%m-%d %H:%M")}.
                     head_meta = json.load(f)
                 last_snapshot = head_meta.get("snapshot", {})
 
-        added = [p for p in current if p not in last_snapshot and not p.startswith(".op/")]
-        modified = [
-            p for p in current
-            if p in last_snapshot and current[p] != last_snapshot[p] and not p.startswith(".op/")
-        ]
-        deleted = [p for p in last_snapshot if p not in current and not p.startswith(".op/")]
+            added = [p for p in current if p not in last_snapshot and not p.startswith(".op/")]
+            modified = [
+                p for p in current
+                if p in last_snapshot and current[p] != last_snapshot[p] and not p.startswith(".op/")
+            ]
+            deleted = [p for p in last_snapshot if p not in current and not p.startswith(".op/")]
 
-        if added or modified or deleted:
-            console.print("\n[bold yellow]Uncommitted changes:[/bold yellow]")
-            for p in added:
-                console.print(f"  [green]+[/green] {p}")
-            for p in modified:
-                console.print(f"  [yellow]~[/yellow] {p}")
-            for p in deleted:
-                console.print(f"  [red]-[/red] {p}")
-            total = len(added) + len(modified) + len(deleted)
-            console.print(
-                f"\n  [dim]{len(added)} new, {len(modified)} modified, "
-                f"{len(deleted)} deleted ({total} total)[/dim]"
-            )
-            console.print("  Use: [cyan]op commit -m \"message\"[/cyan]")
-        else:
-            console.print("\n[green]✓ No uncommitted changes[/green]")
+            if added or modified or deleted:
+                console.print("\n[bold yellow]Uncommitted changes:[/bold yellow]")
+                for p in added:
+                    console.print(f"  [green]+[/green] {p}")
+                for p in modified:
+                    console.print(f"  [yellow]~[/yellow] {p}")
+                for p in deleted:
+                    console.print(f"  [red]-[/red] {p}")
+                total = len(added) + len(modified) + len(deleted)
+                console.print(
+                    f"\n  [dim]{len(added)} new, {len(modified)} modified, "
+                    f"{len(deleted)} deleted ({total} total)[/dim]"
+                )
+                console.print("  Use: [cyan]op commit -m \"message\"[/cyan]")
+            else:
+                console.print("\n[green]✓ No uncommitted changes[/green]")
 
-        # Check for unpushed changes
-        if push_snapshot_path.exists():
+        # Unpushed changes — only relevant if you've pushed to a server at least once.
+        if has_pushed:
             import json
             with open(push_snapshot_path) as f:
                 push_data = json.load(f)
             push_snapshot = push_data.get("snapshot", {})
             push_version = push_data.get("version", "?")
-
-            from operation_repo.commits import CommitManager
-            cm = CommitManager()
-            current = cm._get_file_snapshot()
 
             p_added = [p for p in current if p not in push_snapshot and not p.startswith(".op/")]
             p_modified = [
@@ -454,6 +456,19 @@ Operation initialized on {datetime.now().strftime("%Y-%m-%d %H:%M")}.
                 console.print(
                     f"\n[green]✓ Up to date with server (v{push_version})[/green]"
                 )
+
+        # Fresh repo — no commits and no pushes yet. List what's tracked and
+        # offer both paths equally instead of assuming which workflow you want.
+        if not has_commits and not has_pushed:
+            user_files = sorted(p for p in current if not p.startswith(".op/"))
+            if user_files:
+                console.print(
+                    f"\n[bold]Tracked files ({len(user_files)}), not yet saved:[/bold]"
+                )
+                for p in user_files:
+                    console.print(f"  [green]+[/green] {p}")
+                console.print("\n  Snapshot locally:  [cyan]op commit -m \"message\"[/cyan]")
+                console.print("  Or push to server: [cyan]op push[/cyan]")
 
     def export(
         self,
